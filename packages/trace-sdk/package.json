@@ -1,0 +1,13 @@
+{
+  "name": "@traceflow/sdk",
+  "version": "1.0.0",
+  "description": "TraceFlow SDK for client-side tracking",
+  "main": "index.js",
+  "scripts": {
+    "dev": "echo \"implement dev script\"",
+    "build": "echo \"implement build script\""
+  },
+  "keywords": ["sdk", "tracking"],
+  "author": "",
+  "license": "ISC"
+}

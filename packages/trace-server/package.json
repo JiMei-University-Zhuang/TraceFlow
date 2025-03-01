@@ -1,0 +1,13 @@
+{
+  "name": "@traceflow/server",
+  "version": "1.0.0",
+  "description": "TraceFlow backend server",
+  "main": "index.js",
+  "scripts": {
+    "dev": "echo \"implement dev script\"",
+    "build": "echo \"implement build script\""
+  },
+  "keywords": ["server", "backend"],
+  "author": "",
+  "license": "ISC"
+}

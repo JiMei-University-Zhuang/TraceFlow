@@ -1,0 +1,13 @@
+{
+  "name": "@traceflow/admin",
+  "version": "1.0.0",
+  "description": "TraceFlow admin dashboard",
+  "main": "index.js",
+  "scripts": {
+    "dev": "echo \"implement dev script\"",
+    "build": "echo \"implement build script\""
+  },
+  "keywords": ["admin", "dashboard"],
+  "author": "",
+  "license": "ISC"
+}

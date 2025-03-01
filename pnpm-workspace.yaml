@@ -1,0 +1,4 @@
+packages:
+  - 'packages/trace-sdk'
+  - 'packages/trace-server'
+  - 'packages/trace-admin'
