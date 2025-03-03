@@ -11,7 +11,7 @@
     "lint": "eslint './packages/**/src/**/*.{js,jsx,ts,tsx}'",
     "lint:fix": "eslint './packages/**/src/**/*.{js,jsx,ts,tsx}' --fix",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,yml,yaml}\"",
-    "test": "echo \"No tests available yet.\""
+    "test": "echo \"No test specified\""
   },
   "keywords": [
     "monitoring",
