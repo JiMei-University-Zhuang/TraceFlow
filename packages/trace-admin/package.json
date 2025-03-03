@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/react": "^19.0.10",
     "@vitejs/plugin-react": "^4.3.4",
     "husky": "^8.0.0",
     "react": "^19.0.0",
