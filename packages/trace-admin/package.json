@@ -1,13 +1,40 @@
 {
-  "name": "@traceflow/admin",
-  "version": "1.0.0",
-  "description": "TraceFlow admin dashboard",
-  "main": "index.js",
+  "name": "trace-admin",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "echo \"implement dev script\"",
-    "build": "echo \"implement build script\""
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
-  "keywords": ["admin", "dashboard"],
-  "author": "",
-  "license": "ISC"
+  "dependencies": {
+    "@ant-design/charts": "^2.2.6",
+    "@ant-design/icons": "^5.6.1",
+    "@reduxjs/toolkit": "^2.6.0",
+    "antd": "^5.24.2",
+    "echarts": "^5.6.0",
+    "echarts-for-react": "^3.0.2",
+    "prismjs": "^1.29.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.2.0",
+    "redux": "^5.0.1",
+    "rrweb": "2.0.0-alpha.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.21.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^15.15.0",
+    "typescript": "~5.7.2",
+    "typescript-eslint": "^8.24.1",
+    "vite": "^6.2.0"
+  }
 }
