@@ -1,0 +1,103 @@
+/* 科技感字体 */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Rajdhani:wght@500&display=swap');
+
+/* 设置 html 和 body 的高度为 100% */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* 全局样式 */
+.tech-bg {
+  background: #0f172a;
+  color: #fff; /* 修改此处为纯白色 */
+  font-family: 'Rajdhani', sans-serif;
+  height: 100vh; /* 设置高度为视口高度 */
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* 文字渐变效果 */
+.text-gradient {
+  background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tech-bg * {
+    color: inherit;
+  }
+
+/* 菜单项动效 */
+.tech-menu.ant-menu-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1)!important;
+  border-radius: 6px;
+  margin: 8px 0!important;
+  color: #fff !important;
+}
+
+.tech-menu.ant-menu-item:hover {
+  background: rgba(79, 172, 254, 0.1)!important;
+  transform: translateX(4px);
+}
+
+.tech-menu.ant-menu-item-selected {
+  background: linear-gradient(90deg, rgba(79, 172, 254, 0.2) 0%, transparent 100%)!important;
+  border-left: 3px solid #4facfe;
+}
+
+/* 霓虹链接效果 */
+.neon-link {
+  position: relative;
+  padding-left: 8px;
+  transition: color 0.3s;
+}
+
+.neon-link:hover {
+  color: #00f2fe!important;
+}
+
+.neon-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
+  transition: width 0.3s;
+}
+
+.neon-link:hover::after {
+  width: 100%;
+}
+
+/* 卡片悬浮效果 */
+.tech-card {
+  background: rgba(15, 23, 42, 0.7)!important;
+  border: 1px solid rgba(79, 172, 254, 0.2);
+  backdrop-filter: blur(10px);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.tech-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 20px rgba(79, 172, 254, 0.15);
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #4facfe, #00f2fe);
+  border-radius: 4px;
+}
