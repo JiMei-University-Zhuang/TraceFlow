@@ -68,8 +68,7 @@ const App = () => {
           style={{ 
             background: 'transparent',
             borderRight: 'none',
-            padding: '0 12px',
-            color: '#fff' // 添加这行
+            padding: '0 12px'
           }}
           items={menuItems}
           className="tech-menu"

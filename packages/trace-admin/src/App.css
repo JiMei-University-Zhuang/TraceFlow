@@ -12,7 +12,7 @@ body {
 /* 全局样式 */
 .tech-bg {
   background: #0f172a;
-  color: #fff !important; /* 强制设置字体颜色为白色 */
+  color: #fff; /* 修改此处为纯白色 */
   font-family: 'Rajdhani', sans-serif;
   height: 100vh; /* 设置高度为视口高度 */
   width: 100%;
@@ -33,12 +33,12 @@ body {
 
 /* 菜单项动效 */
 .tech-menu.ant-menu-item {
-  background: transparent !important;
-  color: #fff !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1)!important;
   border-radius: 6px;
   margin: 8px 0!important;
-  
+  color: #fff !important;
 }
+
 .tech-menu.ant-menu-item:hover {
   background: rgba(79, 172, 254, 0.1)!important;
   transform: translateX(4px);
@@ -48,7 +48,6 @@ body {
   background: linear-gradient(90deg, rgba(79, 172, 254, 0.2) 0%, transparent 100%)!important;
   border-left: 3px solid #4facfe;
 }
-  
 
 /* 霓虹链接效果 */
 .neon-link {
