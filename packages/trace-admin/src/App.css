@@ -1,3 +1,6 @@
+/* 科技感字体 */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Rajdhani:wght@500&display=swap');
+
 /* 设置 html 和 body 的高度为 100% */
 html,
 body {
@@ -8,23 +11,18 @@ body {
 
 /* 全局样式 */
 .tech-bg {
-  background: #151515;
-  color: #fff; /* 修改此处为纯白色 */
+  background: #0f172a;
+  color: #fff; 
   font-family: 'Rajdhani', sans-serif;
-  height: 100vh; /* 设置高度为视口高度 */
+  height: 100vh; 
   width: 100%;
   margin: 0;
   padding: 0;
 }
 
-.logo-container{
-  display: flex;
-  justify-content: center;
-  align-items: center; /* 如需垂直居中 */
-}
 /* 文字渐变效果 */
 .text-gradient {
-  background: linear-gradient(45deg, #ffffff 0%, #ebeff3 100%);
+  background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -34,20 +32,21 @@ body {
   }
 
 /* 菜单项动效 */
-.ant-menu-item {
+.tech-menu.ant-menu-item {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1)!important;
   border-radius: 6px;
   margin: 8px 0!important;
   color: #fff !important;
-  
 }
-.ant-menu-item:hover {
-  background: #242424!important;
+
+.tech-menu.ant-menu-item:hover {
+  background: rgba(79, 172, 254, 0.1)!important;
   transform: translateX(4px);
 }
 
-.ant-menu-item-selected{
-  background-color: #2e2f2f!important;
+.tech-menu.ant-menu-item-selected {
+  background: linear-gradient(90deg, rgba(79, 172, 254, 0.2) 0%, transparent 100%)!important;
+  border-left: 3px solid #4facfe;
 }
 
 /* 霓虹链接效果 */
@@ -57,9 +56,9 @@ body {
   transition: color 0.3s;
 }
 
-/* .neon-link:hover {
+.neon-link:hover {
   color: #00f2fe!important;
-} */
+}
 
 .neon-link::after {
   content: '';
@@ -68,7 +67,7 @@ body {
   left: 0;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, #ebeff3, #5d6868);
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
   transition: width 0.3s;
 }
 
