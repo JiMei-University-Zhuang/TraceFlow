@@ -1,12 +1,12 @@
 import { Layout, Menu } from 'antd';
 import { Routes, Route, Link } from 'react-router-dom';
-import { 
+import {
   DashboardOutlined,
-  BugOutlined, 
+  BugOutlined,
   LineChartOutlined,
-  UserSwitchOutlined
+  UserSwitchOutlined,
 } from '@ant-design/icons';
-import './App.css'; // 需要创建这个CSS文件
+import './App.css';
 
 import RealtimeOverview from './pages/RealtimeOverview/index';
 import ErrorMonitor from './pages/ErrorMonitor/index';
@@ -17,10 +17,10 @@ const { Sider, Content } = Layout;
 
 // 科技感颜色配置
 const techColors = {
-  primary: '#00f2fe',    // 科技蓝
-  secondary: '#4facfe',  // 渐变蓝
-  bgDark: '#0f172a',     // 深空背景
-  accent: '#ff6b6b',     // 高亮红色
+  primary: '#00f2fe',
+  secondary: '#4facfe',
+  bgDark: '#0f172a',
+  accent: '#ff6b6b',
 };
 
 const App = () => {
@@ -28,23 +28,39 @@ const App = () => {
     {
       key: '1',
       icon: <DashboardOutlined style={{ fontSize: '1.2rem', color: techColors.primary }} />,
-      label: <Link to="/" className="neon-link">实时概览</Link>,
+      label: (
+        <Link to="/" className="neon-link">
+          实时概览
+        </Link>
+      ),
     },
     {
       key: '2',
       icon: <BugOutlined style={{ fontSize: '1.2rem', color: techColors.primary }} />,
-      label: <Link to="/errors" className="neon-link">错误监控</Link>,
+      label: (
+        <Link to="/errors" className="neon-link">
+          错误监控
+        </Link>
+      ),
     },
     {
       key: '3',
       icon: <LineChartOutlined style={{ fontSize: '1.2rem', color: techColors.primary }} />,
-      label: <Link to="/performance" className="neon-link">性能分析</Link>,
+      label: (
+        <Link to="/performance" className="neon-link">
+          性能分析
+        </Link>
+      ),
     },
     {
       key: '4',
       icon: <UserSwitchOutlined style={{ fontSize: '1.2rem', color: techColors.primary }} />,
-      label: <Link to="/behavior" className="neon-link">用户行为</Link>,
-    }
+      label: (
+        <Link to="/behavior" className="neon-link">
+          用户行为
+        </Link>
+      ),
+    },
   ];
 
   return (
@@ -54,9 +70,9 @@ const App = () => {
         width={240}
         breakpoint="lg"
         collapsedWidth="0"
-        style={{ 
+        style={{
           background: `linear-gradient(195deg, ${techColors.bgDark} 0%, #1e293b 100%)`,
-          borderRight: `1px solid rgba(79, 172, 254, 0.2)`
+          borderRight: `1px solid rgba(79, 172, 254, 0.2)`,
         }}
       >
         <div className="logo-container p-4 mb-4">
@@ -65,16 +81,16 @@ const App = () => {
         <Menu
           mode="inline"
           defaultSelectedKeys={['1']}
-          style={{ 
+          style={{
             background: 'transparent',
             borderRight: 'none',
-            padding: '0 12px'
+            padding: '0 12px',
           }}
           items={menuItems}
           className="tech-menu"
         />
       </Sider>
-      
+
       <Layout>
         <Content className="p-6 bg-opacity-90" style={{ background: techColors.bgDark }}>
           <Routes>

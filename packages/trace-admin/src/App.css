@@ -12,9 +12,9 @@ body {
 /* 全局样式 */
 .tech-bg {
   background: #0f172a;
-  color: #fff; /* 修改此处为纯白色 */
+  color: #fff; 
   font-family: 'Rajdhani', sans-serif;
-  height: 100vh; /* 设置高度为视口高度 */
+  height: 100vh; 
   width: 100%;
   margin: 0;
   padding: 0;

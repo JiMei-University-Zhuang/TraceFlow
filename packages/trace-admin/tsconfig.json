@@ -1,17 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "ESNext",
-    "jsx": "react-jsx", // 关键配置：启用 JSX
-    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "baseUrl": "./",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "target": "ES6",
+    "lib": ["DOM", "ESNext"],
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./*"]
     }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"]
 }

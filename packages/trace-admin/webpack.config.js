@@ -2,16 +2,16 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
-import webpack from 'webpack'; // 关键修改点
+import webpack from 'webpack';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const { DefinePlugin } = webpack; // 正确解构插件
+const { DefinePlugin } = webpack;
 
 export default {
   mode: 'development',
   entry: './src/main.tsx',
   output: {
-    filename: 'bundle.js', // 注意：输出文件名应为 .js 而非 .tsx
+    filename: 'bundle.js',
     path: path.join(__dirname, 'dist'),
   },
   module: {
@@ -31,13 +31,30 @@ export default {
       },
       {
         test: /\.(ts|tsx)$/,
+        use: [
+          'babel-loader',
+          {
+            loader: 'ts-loader',
+            options: {
+              compilerOptions: {
+                jsx: 'react-jsx',
+              },
+            },
+          },
+        ],
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.(ts|tsx)$/,
         use: 'ts-loader',
         exclude: /node_modules/,
       },
     ],
   },
   plugins: [
-    new HtmlWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      template: './public/index.html',
+    }),
     new CleanWebpackPlugin(),
     new DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('development'),
