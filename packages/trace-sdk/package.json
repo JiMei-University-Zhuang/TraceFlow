@@ -5,12 +5,22 @@
   "main": "index.js",
   "scripts": {
     "dev": "echo \"implement dev script\"",
-    "build": "echo \"implement build script\""
+    "format": "prettier --write .",
+    "build": "rollup -c"
   },
   "keywords": [
     "sdk",
     "tracking"
   ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.2",
+    "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.34.9",
+    "rollup-plugin-typescript2": "^0.36.0",
+    "typescript": "^5.8.2"
+  },
+  "type": "module"
 }
