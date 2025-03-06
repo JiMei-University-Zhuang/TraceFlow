@@ -17,6 +17,33 @@ pnpm start:dev
 
 ## API 示例
 
+### 获取埋点事件列表
+
+#### 请求
+
+```bash
+curl http://localhost:3000/events?page=1&limit=10
+```
+
+#### 参数说明
+
+- `page`: 页码，默认值为 1
+- `limit`: 每页数量，默认值为 10
+
+#### 响应
+
+```json
+{
+  "success": true,
+  "data": [],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 0
+  }
+}
+```
+
 ### 发送埋点事件
 
 #### 请求
