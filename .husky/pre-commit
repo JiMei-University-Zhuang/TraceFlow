@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+export NODE_OPTIONS="--max-old-space-size=8192"
+
 #npm test
 pnpm lint-staged
