@@ -79,6 +79,7 @@ curl -X POST http://localhost:3000/events \
 以下是一些常见的事件类型示例：
 
 1. 页面访问事件
+
 ```json
 {
   "type": "page_view",
@@ -94,6 +95,7 @@ curl -X POST http://localhost:3000/events \
 ```
 
 2. 点击事件
+
 ```json
 {
   "type": "click",
@@ -110,6 +112,7 @@ curl -X POST http://localhost:3000/events \
 ```
 
 3. 性能事件
+
 ```json
 {
   "type": "performance",
@@ -127,6 +130,7 @@ curl -X POST http://localhost:3000/events \
 ```
 
 4. 错误事件
+
 ```json
 {
   "type": "error",
