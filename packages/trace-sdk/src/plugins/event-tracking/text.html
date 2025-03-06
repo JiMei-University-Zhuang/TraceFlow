@@ -7,7 +7,32 @@
   </head>
   <body>
     <h1>Test Page</h1>
-
+    <h1>History Event Tracking Test</h1>
+    <button id="pushStateButton">Push State</button>
+    <button id="replaceStateButton">Replace State</button>
+    <button id="changeHashButton">Change Hash</button>
+    <button id="goBackButton">Go Back</button>
     <script type="module" src="../../../dist/bundle.js"></script>
+    <script>
+      document.getElementById('pushStateButton').addEventListener('click', () => {
+        history.pushState(null, '', '/new-page');
+        console.log('PushState 被调用');
+      });
+
+      document.getElementById('replaceStateButton').addEventListener('click', () => {
+        history.replaceState(null, '', '/another-page');
+        console.log('ReplaceState 被调用');
+      });
+
+      document.getElementById('changeHashButton').addEventListener('click', () => {
+        window.location.hash = '#new-hash';
+        console.log('HashChange 被调用');
+      });
+
+      document.getElementById('goBackButton').addEventListener('click', () => {
+        window.history.back();
+        console.log('GoBack 被调用');
+      });
+    </script>
   </body>
 </html>

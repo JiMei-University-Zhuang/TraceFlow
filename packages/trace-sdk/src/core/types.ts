@@ -17,3 +17,11 @@ export interface PageInformation {
   winScreen: string;
   docScreen: string;
 }
+
+// 用户行为记录
+export interface behaviorStack {
+  name: string;
+  page: string;
+  timeStamp: number | string;
+  value: Record<string, any>;
+}
