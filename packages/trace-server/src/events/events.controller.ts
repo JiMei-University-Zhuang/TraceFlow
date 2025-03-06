@@ -40,4 +40,23 @@ export class EventsController {
       },
     };
   }
+
+  @Get('stats')
+  async getEventStats() {
+    // 模拟统计数据
+    return {
+      success: true,
+      data: {
+        total: 1000,
+        byType: {
+          page_view: 400,
+          click: 300,
+          error: 50,
+          performance: 250,
+        },
+        last24Hours: 150,
+        activeUsers: 120,
+      },
+    };
+  }
 }

@@ -74,6 +74,33 @@ curl -X POST http://localhost:3000/events \
 }
 ```
 
+### 获取事件统计信息
+
+#### 请求
+
+```bash
+curl http://localhost:3000/events/stats
+```
+
+#### 响应
+
+```json
+{
+  "success": true,
+  "data": {
+    "total": 1000,
+    "byType": {
+      "page_view": 400,
+      "click": 300,
+      "error": 50,
+      "performance": 250,
+    },
+    "last24Hours": 150,
+    "activeUsers": 120,
+  }
+}
+```
+
 ## 事件类型示例
 
 以下是一些常见的事件类型示例：
