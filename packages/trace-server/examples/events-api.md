@@ -93,10 +93,10 @@ curl http://localhost:3000/events/stats
       "page_view": 400,
       "click": 300,
       "error": 50,
-      "performance": 250,
+      "performance": 250
     },
     "last24Hours": 150,
-    "activeUsers": 120,
+    "activeUsers": 120
   }
 }
 ```
