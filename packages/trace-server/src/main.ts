@@ -5,7 +5,11 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // 启用 CORS
-  app.enableCors();
+  app.enableCors({
+    origin: true, // 允许所有来源
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
   // 启用全局验证管道
   app.useGlobalPipes(
     new ValidationPipe({
