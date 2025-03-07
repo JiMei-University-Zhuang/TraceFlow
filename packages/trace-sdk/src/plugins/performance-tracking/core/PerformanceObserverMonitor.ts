@@ -1,5 +1,5 @@
 // 静态资源监控
-export function trackResourceLoading() {
+function getResourceLoading() {
   const observer = new PerformanceObserver(list => {
     list.getEntriesByType('resource').forEach(entry => {
       // 具体逻辑
@@ -13,7 +13,7 @@ export function trackResourceLoading() {
 }
 
 // 长任务监控
-export function trackLongTasks() {
+function getLongTasks() {
   const observer = new PerformanceObserver(list => {
     list.getEntriesByType('longtask').forEach(entry => {
       // 具体逻辑
@@ -23,12 +23,7 @@ export function trackLongTasks() {
   observer.observe({ type: 'longtask', buffered: true });
 }
 
-// 统一初始化
-// export function initPerformanceObserverMonitor() {
-//   trackResourceLoading();
-//   trackLongTasks();
-// }
-
-//测试，直接执行
-trackResourceLoading();
-trackLongTasks();
+export function initPerformanceObserverMonitor() {
+  getResourceLoading();
+  getLongTasks();
+}
