@@ -1,9 +1,10 @@
 import { UserMetricsStore } from '../../core/base';
-import { metricsName } from '../../core/types';
+import { metricsName, OriginInformation } from '../../core/types';
 import { getPageInfo } from '../../utils/index';
-import { proxyHash, proxyHistory, wrHistory } from './monitoring/eventTracker';
+import { getOriginInfo, proxyHash, proxyHistory, wrHistory } from './monitoring/eventTracker';
 
 const PI = metricsName.PI;
+const RCR = metricsName.RCR;
 export class EventTracking {
   //本地暂存数据Map
   private metrics: UserMetricsStore;
@@ -22,7 +23,8 @@ export class EventTracking {
     console.log(PI, info);
   };
   initOriginInfo = (): void => {
-    console.log('初始化用户来源信息');
+    const info: OriginInformation = getOriginInfo();
+    console.log('用户来源', info);
   };
   initPV = (): void => {
     console.log('初始化页面浏览量的获取');
@@ -35,7 +37,12 @@ export class EventTracking {
         timestamp: new Date().getTime(),
         pageInfo: getPageInfo(),
       };
+      const behavior = {
+        category: RCR,
+        data: metrics,
+      };
       console.log('metrics', metrics);
+      console.log('behavior', behavior);
     };
     proxyHash(handler);
 

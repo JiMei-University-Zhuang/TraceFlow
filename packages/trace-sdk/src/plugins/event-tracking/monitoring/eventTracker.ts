@@ -1,4 +1,7 @@
-//监控页面的事件
+//监控页面的事件 负责记录和跟踪页面的事件
+
+import { OriginInformation } from '../../../core/types';
+
 // 派发出新的 Event
 const wr = (type: keyof History) => {
   const orig = history[type];
@@ -26,4 +29,21 @@ export const proxyHash = (handler: (event: Event) => void): void => {
   window.addEventListener('hashchange', e => handler(e), true);
   //添加对propstate的监听 浏览器回退或前进时添加
   window.addEventListener('popstate', e => handler(e), true);
+};
+
+// 返回OI用户来源信息
+export const getOriginInfo = (): OriginInformation => {
+  let type = '';
+  // 获取页面的导航类型
+  const navigationEntries = performance.getEntriesByType('navigation');
+  if (navigationEntries.length > 0) {
+    // 数组中的第一个条目就是当前页面的导航数据。
+    const navTiming = navigationEntries[0] as PerformanceNavigationTiming;
+    type = navTiming.type; // type 可以是 "navigate"、"reload"、"back_forward"、"reserved" 等
+  }
+  return {
+    // 可以获取用户的来源信息
+    referrer: document.referrer,
+    type: type || '',
+  };
 };

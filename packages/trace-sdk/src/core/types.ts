@@ -25,3 +25,8 @@ export interface behaviorStack {
   timeStamp: number | string;
   value: Record<string, any>;
 }
+
+export interface OriginInformation {
+  referrer: string;
+  type: number | string;
+}
