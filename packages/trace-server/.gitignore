@@ -1,0 +1,30 @@
+# Build output
+/dist
+/build
+
+# Dependencies
+/node_modules
+
+# Logs
+/logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Test coverage
+/coverage
+/.nyc_output
+
+# IDE
+/.idea
+/.vscode
+*.sublime-workspace
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Cache
+*.tsbuildinfo
+.eslintcache
