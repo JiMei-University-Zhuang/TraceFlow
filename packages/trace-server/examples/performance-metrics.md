@@ -37,13 +37,20 @@ curl "http://localhost:3000/performance/metrics?metricName=FCP"
 预期响应：
 
 ```json
-[
-  {
-    "metricName": "FCP",
-    "value": 1200,
-    "timestamp": 1678271400000
-  }
-]
+{
+  "success": true,
+  "data": {
+    "metrics": [
+      {
+        "metricName": "FCP",
+        "value": 1200,
+        "timestamp": 1678271400000
+      }
+    ]
+  },
+  "message": "成功获取 FCP 的性能指标",
+  "timestamp": 1678271400000
+}
 ```
 
 ## 测试步骤
