@@ -1,13 +1,7 @@
-import React from 'react';
+import { jsx as _jsx } from 'react/jsx-runtime';
 import ReactECharts from 'echarts-for-react';
-import { PerformanceMetric } from '../../types';
-import type { EChartsOption } from 'echarts';
-
-interface Props {
-  metrics: PerformanceMetric[];
-}
-
-const PerformanceAnalysis: React.FC<Props> = ({ metrics }) => {
+const PerformanceAnalysis = ({ metrics }) => {
+  // 雷达图指标定义
   const indicators = [
     { name: 'LCP', max: 4 },
     { name: 'FP', max: 2 },
@@ -15,13 +9,12 @@ const PerformanceAnalysis: React.FC<Props> = ({ metrics }) => {
     { name: 'CLS', max: 0.3 },
     { name: '首屏时间', max: 5 },
   ];
-
+  // 转换数据格式
   const formatData = metrics.map(metric => ({
     value: [metric.LCP, metric.FP, metric.FCP, metric.CLS, metric.firstScreenTime],
     name: new Date(metric.timestamp).toLocaleDateString(),
   }));
-
-  const getOption = (): EChartsOption => ({
+  const getOption = () => ({
     title: {
       text: '性能指标雷达图',
       left: 'center',
@@ -71,8 +64,6 @@ const PerformanceAnalysis: React.FC<Props> = ({ metrics }) => {
       },
     ],
   });
-
-  return <ReactECharts option={getOption()} style={{ height: 450, margin: '300px 50px' }} opts={{ renderer: 'svg' }} />;
+  return _jsx(ReactECharts, { option: getOption(), style: { height: 300, margin: '300px 50px' }, opts: { renderer: 'svg' } });
 };
-
 export default PerformanceAnalysis;

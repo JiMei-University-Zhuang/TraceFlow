@@ -3,6 +3,8 @@ import { Routes, Route, Link } from 'react-router-dom';
 import { DashboardOutlined, BugOutlined, LineChartOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import './App.css';
 
+import rawData from './data/db.json';
+
 import RealtimeOverview from './pages/RealtimeOverview/index';
 import ErrorMonitor from './pages/ErrorMonitor/index';
 import PerformanceAnalysis from './pages/PerformanceAnalysis/index';
@@ -10,7 +12,9 @@ import UserBehavior from './pages/UserBehavior/index';
 
 const { Sider, Content } = Layout;
 
-const App = () => {
+import React from 'react';
+
+const App: React.FC = () => {
   const menuItems = [
     {
       key: '1',
@@ -81,7 +85,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<RealtimeOverview />} />
             <Route path="/errors" element={<ErrorMonitor />} />
-            <Route path="/performance" element={<PerformanceAnalysis />} />
+            <Route path="/performance" element={<PerformanceAnalysis metrics={rawData.performanceMetrics} />} />
             <Route path="/behavior" element={<UserBehavior />} />
           </Routes>
         </Content>
