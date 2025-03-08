@@ -1,13 +1,19 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# 检查是否有依赖文件的更改
+# 设置 PATH 以包含 node 和 pnpm
+export PATH="/usr/local/bin:$PATH"
+
 if git diff HEAD@{1} --name-only | grep -q "^package-lock.json\|^yarn.lock\|^pnpm-lock.yaml"; then
   echo "📦 检测到依赖文件有更新，正在安装新的依赖..."
-  pnpm install
+  if command -v pnpm >/dev/null 2>&1; then
+    pnpm install
+  else
+    echo "⚠️ pnpm 命令不可用，请手动运行 pnpm install"
+  fi
 fi
 
-# 检查是否有配置文件的更改
+
 if git diff HEAD@{1} --name-only | grep -q "^.env\|^.env.*\|^config/"; then
   echo "⚙️ 检测到配置文件有更新，请检查是否需要更新本地配置"
 fi
