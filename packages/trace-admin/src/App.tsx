@@ -3,8 +3,6 @@ import { Routes, Route, Link } from 'react-router-dom';
 import { DashboardOutlined, BugOutlined, LineChartOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import './App.css';
 
-import rawData from './data/db.json';
-
 import RealtimeOverview from './pages/RealtimeOverview/index';
 import ErrorMonitor from './pages/ErrorMonitor/index';
 import PerformanceAnalysis from './pages/PerformanceAnalysis/index';
@@ -85,7 +83,7 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<RealtimeOverview />} />
             <Route path="/errors" element={<ErrorMonitor />} />
-            <Route path="/performance" element={<PerformanceAnalysis metrics={rawData.performanceMetrics} />} />
+            <Route path="/performance" element={<PerformanceAnalysis />} />
             <Route path="/behavior" element={<UserBehavior />} />
           </Routes>
         </Content>
