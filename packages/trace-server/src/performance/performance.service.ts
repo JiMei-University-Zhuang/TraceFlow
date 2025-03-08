@@ -10,4 +10,9 @@ export class PerformanceService {
     this.metrics.push(metric);
     return metric;
   }
+
+  // 获取指定名称的性能指标
+  async getMetricsByName(metricName: string) {
+    return this.metrics.filter((metric) => metric.metricName === metricName);
+  }
 }

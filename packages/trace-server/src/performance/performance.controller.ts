@@ -1,6 +1,7 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query } from '@nestjs/common';
 import { PerformanceService } from './performance.service';
 import { PerformanceMetricDto } from './dto/performance-metric.dto';
+import { QueryMetricDto } from './dto/query-metric.dto';
 
 @Controller('performance')
 export class PerformanceController {
@@ -9,5 +10,10 @@ export class PerformanceController {
   @Post('metrics')
   async saveMetric(@Body() metric: PerformanceMetricDto) {
     return this.performanceService.saveMetric(metric);
+  }
+
+  @Get('metrics')
+  async getMetricsByName(@Query() query: QueryMetricDto) {
+    return this.performanceService.getMetricsByName(query.metricName);
   }
 }
