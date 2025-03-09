@@ -3,5 +3,46 @@
 
 export NODE_OPTIONS="--max-old-space-size=8192"
 
-#npm test
+# 获取要提交的文件列表
+FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g')
+
+# 如果没有文件要提交，直接退出
+if [ -z "$FILES" ]; then
+    echo "没有文件要提交"
+    exit 0
+fi
+
+# 检查是否有未解决的冲突标记
+if grep -l '^<<<<<<< HEAD' "$FILES" >/dev/null 2>&1; then
+    echo "错误: 提交的文件中包含未解决的冲突标记 <<<<<<< HEAD"
+    exit 1
+fi
+
+if grep -l '^>>>>>>> ' "$FILES" >/dev/null 2>&1; then
+    echo "错误: 提交的文件中包含未解决的冲突标记 >>>>>>>"
+    exit 1
+fi
+
+# 检查提交的 TypeScript/JavaScript 文件中是否有 console.log
+for FILE in $FILES; do
+    if [[ "$FILE" =~ \.(ts|js|tsx|jsx)$ ]]; then
+        # 忽略测试文件和示例文件
+        if [[ "$FILE" =~ \.(test|spec|example)\.(ts|js|tsx|jsx)$ ]] || [[ "$FILE" =~ /examples/ ]]; then
+            continue
+        fi
+        if grep -l 'console\.log' "$FILE" >/dev/null 2>&1; then
+            echo "警告: $FILE 文件中包含 console.log 语句"
+            echo "请确认是否需要保留这些调试语句"
+            # 让用户确认是否继续
+            exec < /dev/tty
+            read -p "是否继续提交？(y/N) " yn
+            if [ "$yn" != "y" ]; then
+                echo "提交已取消"
+                exit 1
+            fi
+        fi
+    fi
+done
+
+# 运行 lint-staged
 pnpm lint-staged
