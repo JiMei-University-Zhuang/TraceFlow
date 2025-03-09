@@ -12,6 +12,6 @@ export const TraceSDK = {
     utils.init();
     errorTracking.init();
     eventTracking.init();
-    performanceTracking.init();
+    performanceTracking.init(console.log);
   },
 };

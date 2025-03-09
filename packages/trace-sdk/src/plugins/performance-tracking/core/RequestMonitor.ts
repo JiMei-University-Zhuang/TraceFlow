@@ -28,13 +28,8 @@ const getRequestMonitor = (config: Config) => {
       },
     );
   };
-  // 初始化
   initInterceptors();
-
-  // 暴露实例和配置修改方法
-  return {
-    instance,
-  };
+  return instance;
 };
 
 export const initMonitorAxios = (config: Config) => getRequestMonitor(config);

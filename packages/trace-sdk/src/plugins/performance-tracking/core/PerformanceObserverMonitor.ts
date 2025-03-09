@@ -1,29 +1,38 @@
-// 静态资源监控
-function getResourceLoading() {
+import { Callback } from '../types';
+
+function getResource(callback: Callback) {
   const observer = new PerformanceObserver(list => {
     list.getEntriesByType('resource').forEach(entry => {
-      // 具体逻辑
-      // 1.数据处理
-      // 2.上报
-      // 3.监听开始停止时间
-      console.log('[Resource]', entry.name, entry.duration);
+      //数据处理
+      callback(entry);
     });
   });
   observer.observe({ type: 'resource', buffered: true });
 }
 
 // 长任务监控
-function getLongTasks() {
+function getLongTasks(callback: Callback) {
   const observer = new PerformanceObserver(list => {
     list.getEntriesByType('longtask').forEach(entry => {
-      // 具体逻辑
-      console.log('[LongTask]', entry.duration);
+      // 数据处理
+      callback(entry);
     });
   });
   observer.observe({ type: 'longtask', buffered: true });
 }
 
-export function initPerformanceObserverMonitor() {
-  getResourceLoading();
-  getLongTasks();
+function getFirstPaint(callback: Callback) {
+  const observer = new PerformanceObserver(list => {
+    list.getEntriesByType('first-paint').forEach(entry => {
+      // 数据处理
+      callback(entry);
+    });
+  });
+  observer.observe({ type: 'paint', buffered: true });
+}
+
+export function initPerformanceObserver(callback: Callback) {
+  getResource(callback);
+  getLongTasks(callback);
+  getFirstPaint(callback);
 }
