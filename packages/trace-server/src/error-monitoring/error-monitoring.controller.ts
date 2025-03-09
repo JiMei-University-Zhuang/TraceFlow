@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ErrorMonitoringService } from './error-monitoring.service';
 import { ErrorReportDto } from './dto/error-report.dto';
 import { ApiResponse } from '../common/dto/api-response.dto';
@@ -10,6 +10,7 @@ export class ErrorMonitoringController {
   ) {}
 
   @Post('report')
+  @HttpCode(HttpStatus.OK)
   async reportError(
     @Body() errorReport: ErrorReportDto,
   ): Promise<ApiResponse<ErrorReportDto>> {

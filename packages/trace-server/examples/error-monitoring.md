@@ -11,23 +11,25 @@
 - **接口**: `POST /error-monitoring/report`
 - **功能**: 接收并保存错误报告
 - **请求体格式**:
-  ```typescript
+  ```json
   {
-    message: string;     // 错误消息
-    type: string;       // 错误类型
-    stack: string;      // 错误堆栈信息
-    userAgent?: string; // 用户代理信息（可选）
-    timestamp: number;  // 错误发生时间戳
-    userId?: string;    // 用户ID（可选）
-    environment?: string; // 环境信息（可选）
+    "message": "页面加载失败",
+    "type": "Error",
+    "stack": "Error: 页面加载失败\n    at loadPage (/src/pages/index.tsx:25:7)",
+    "userAgent": "Mozilla/5.0 (Macintosh)",
+    "timestamp": 1709989200000,
+    "userId": "user123",
+    "environment": "production"
   }
   ```
 - **响应格式**:
-  ```typescript
+  ```json
   {
-    success: boolean; // 操作是否成功
-    message: string; // 响应消息
-    errorId: number; // 错误ID
+    "success": true,
+    "message": "错误报告保存成功",
+    "data": {
+      "errorId": 1
+    }
   }
   ```
 
