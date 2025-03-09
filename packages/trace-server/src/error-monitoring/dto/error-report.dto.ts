@@ -1,6 +1,10 @@
 import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 
 export class ErrorReportDto {
+  @IsNumber()
+  @IsOptional()
+  errorId?: number;
+
   @IsString()
   @IsNotEmpty()
   message: string;
