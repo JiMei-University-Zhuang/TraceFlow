@@ -18,16 +18,35 @@ export class EventTracking {
     this.initRouteChange();
   }
 
+  //获取页面信息
   initPageInfo = (): void => {
     const info = getPageInfo();
     console.log(PI, info);
   };
+  //获取页面来源
   initOriginInfo = (): void => {
     const info: OriginInformation = getOriginInfo();
     console.log('用户来源', info);
   };
+  //获取页面访问量
   initPV = (): void => {
-    console.log('初始化页面浏览量的获取');
+    const handler = () => {
+      const metrics = {
+        //记得传入一些表示用户身份信息比如userID
+
+        //创建时间
+        timeStamp: new Date().getTime(),
+        //页面信息
+        pageInfo: getPageInfo(),
+        //用户来源
+        originInformation: getOriginInfo(),
+      };
+      //数据上报
+      console.log('meteics:', metrics);
+    };
+    handler();
+    proxyHash(handler);
+    proxyHistory(handler);
   };
   initRouteChange = (): void => {
     const handler = (e: Event) => {

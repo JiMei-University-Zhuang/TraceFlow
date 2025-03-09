@@ -13,6 +13,6 @@ export const TraceSDK = {
     utils.init();
     errorTracking.init();
     EventTracking.length;
-    performanceTracking.init();
+    performanceTracking.init(console.log);
   },
 };

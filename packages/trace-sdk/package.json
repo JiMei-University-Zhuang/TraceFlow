@@ -19,6 +19,8 @@
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-terser": "^0.4.4",
     "rollup": "^4.34.9",
+    "rollup-plugin-node-polyfills": "^0.2.1",
+    "rollup-plugin-polyfill-node": "^0.13.0",
     "rollup-plugin-typescript2": "^0.36.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.3",
@@ -26,6 +28,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@rollup/plugin-json": "^6.1.0",
     "axios": "^1.8.1",
     "puppeteer": "^24.3.1",
     "web-vitals": "^4.2.4"
