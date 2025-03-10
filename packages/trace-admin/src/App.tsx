@@ -1,11 +1,6 @@
 import { Layout, Menu } from 'antd';
 import { Routes, Route, Link } from 'react-router-dom';
-import {
-  DashboardOutlined,
-  BugOutlined,
-  LineChartOutlined,
-  UserSwitchOutlined,
-} from '@ant-design/icons';
+import { DashboardOutlined, BugOutlined, LineChartOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import './App.css';
 
 import RealtimeOverview from './pages/RealtimeOverview/index';
@@ -15,19 +10,11 @@ import UserBehavior from './pages/UserBehavior/index';
 
 const { Sider, Content } = Layout;
 
-// 科技感颜色配置
-const techColors = {
-  primary: '#00f2fe',
-  secondary: '#4facfe',
-  bgDark: '#0f172a',
-  accent: '#ff6b6b',
-};
-
 const App = () => {
   const menuItems = [
     {
       key: '1',
-      icon: <DashboardOutlined style={{ fontSize: '1.2rem', color: techColors.primary }} />,
+      icon: <DashboardOutlined style={{ fontSize: '1.2rem', color: 'white' }} />,
       label: (
         <Link to="/" className="neon-link">
           实时概览
@@ -36,7 +23,7 @@ const App = () => {
     },
     {
       key: '2',
-      icon: <BugOutlined style={{ fontSize: '1.2rem', color: techColors.primary }} />,
+      icon: <BugOutlined style={{ fontSize: '1.2rem', color: 'white' }} />,
       label: (
         <Link to="/errors" className="neon-link">
           错误监控
@@ -45,7 +32,7 @@ const App = () => {
     },
     {
       key: '3',
-      icon: <LineChartOutlined style={{ fontSize: '1.2rem', color: techColors.primary }} />,
+      icon: <LineChartOutlined style={{ fontSize: '1.2rem', color: 'white' }} />,
       label: (
         <Link to="/performance" className="neon-link">
           性能分析
@@ -54,7 +41,7 @@ const App = () => {
     },
     {
       key: '4',
-      icon: <UserSwitchOutlined style={{ fontSize: '1.2rem', color: techColors.primary }} />,
+      icon: <UserSwitchOutlined style={{ fontSize: '1.2rem', color: 'white' }} />,
       label: (
         <Link to="/behavior" className="neon-link">
           用户行为
@@ -71,8 +58,7 @@ const App = () => {
         breakpoint="lg"
         collapsedWidth="0"
         style={{
-          background: `linear-gradient(195deg, ${techColors.bgDark} 0%, #1e293b 100%)`,
-          borderRight: `1px solid rgba(79, 172, 254, 0.2)`,
+          background: `#1A1A1A`,
         }}
       >
         <div className="logo-container p-4 mb-4">
@@ -87,12 +73,11 @@ const App = () => {
             padding: '0 12px',
           }}
           items={menuItems}
-          className="tech-menu"
         />
       </Sider>
 
       <Layout>
-        <Content className="p-6 bg-opacity-90" style={{ background: techColors.bgDark }}>
+        <Content className="p-6 bg-opacity-90" style={{ background: '#151515' }}>
           <Routes>
             <Route path="/" element={<RealtimeOverview />} />
             <Route path="/errors" element={<ErrorMonitor />} />

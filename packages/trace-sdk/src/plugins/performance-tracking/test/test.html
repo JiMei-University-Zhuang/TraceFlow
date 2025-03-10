@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="module" src="../../../../dist/bundle.js"></script>
+    <title>标准HTML模板</title>
+  </head>
+  <body>
+    <div id="app">123</div>
+    <script>
+      setTimeout(() => {
+        const start = Date.now();
+        while (Date.now() - start < 60) {} // 阻塞主线程 60ms
+      }, 1000);
+    </script>
+  </body>
+</html>
