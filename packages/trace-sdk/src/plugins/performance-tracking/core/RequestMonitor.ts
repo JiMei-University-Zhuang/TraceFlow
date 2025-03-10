@@ -8,38 +8,38 @@ const getRequestMonitor = (config: Config) => {
   const initInterceptors = () => {
     // 请求拦截器
     instance.interceptors.request.use((config: CustomRequestConfig) => {
-      config.metadata = { startTime: performance.now() };
+      config.metaData = { startTime: performance.now() };
       return config;
     });
 
     // 响应拦截器
     instance.interceptors.response.use(
       response => {
-        const { metadata } = response.config as CustomRequestConfig;
-        if (metadata?.startTime) {
-          const sdkdata = {
+        const { metaData } = response.config as CustomRequestConfig;
+        if (metaData?.startTime) {
+          const sdkData = {
             timestamp: Date.now(),
             url: response.config.url,
             method: response.config.method,
             status: response.status,
-            duration: performance.now() - metadata.startTime,
+            duration: performance.now() - metaData.startTime,
           };
-          console.log({ requestMonitor: sdkdata }); //后续替换为上报
+          console.log({ requestMonitor: sdkData }); //后续替换为上报
         }
         return response;
       },
       error => {
-        const { metadata } = error.config as CustomRequestConfig;
-        if (metadata?.startTime) {
-          const errordata = {
+        const { metaData } = error.config as CustomRequestConfig;
+        if (metaData?.startTime) {
+          const errorData = {
             timestamp: Date.now(),
             url: error.config.url,
             method: error.config.method,
             status: error.response.status,
-            duration: performance.now() - metadata.startTime,
+            duration: performance.now() - metaData.startTime,
             error: error.message,
           };
-          console.log({ requestMonitor: errordata }); //后续替换为上报
+          console.log({ requestMonitor: errorData }); //后续替换为上报
         }
         return Promise.reject(error);
       },
