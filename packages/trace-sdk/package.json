@@ -4,7 +4,7 @@
   "description": "TraceFlow SDK for client-side tracking",
   "main": "index.js",
   "scripts": {
-    "dev": "echo \"implement dev script\"",
+    "dev": "tsx src/plugins/event-tracking/text.ts",
     "format": "prettier --write .",
     "build": "rollup -c"
   },
@@ -22,6 +22,8 @@
     "rollup-plugin-node-polyfills": "^0.2.1",
     "rollup-plugin-polyfill-node": "^0.13.0",
     "rollup-plugin-typescript2": "^0.36.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   },
   "type": "module",
