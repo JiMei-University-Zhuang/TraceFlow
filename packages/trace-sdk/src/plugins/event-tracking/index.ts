@@ -1,7 +1,7 @@
-import { UserMetricsStore } from '../../core/base';
-import { metricsName, OriginInformation } from '../../core/types';
-import { getPageInfo } from '../../utils/index';
-import { getOriginInfo, proxyHash, proxyHistory, wrHistory } from './monitoring/eventTracker';
+import { UserMetricsStore } from './core/base';
+import { metricsName, OriginInformation } from './types/types';
+import { getPageInfo } from './core/getpage';
+import { getOriginInfo, proxyHash, proxyHistory, wrHistory } from './core/eventTracker';
 
 const PI = metricsName.PI;
 const RCR = metricsName.RCR;

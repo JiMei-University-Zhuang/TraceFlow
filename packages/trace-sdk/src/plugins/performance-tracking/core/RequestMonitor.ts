@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Config, CustomRequestConfig } from '../types';
+import { Config, CustomRequestConfig } from '../types/type';
 
 const getRequestMonitor = (config: Config) => {
   const instance = axios.create(config);

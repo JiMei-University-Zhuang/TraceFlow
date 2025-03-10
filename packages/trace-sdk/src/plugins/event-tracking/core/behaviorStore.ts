@@ -1,6 +1,6 @@
 //用户行为记录栈
 
-import { behaviorStack } from '../../../core/types';
+import { behaviorStack } from '../types/types';
 
 //限制存储数量
 export interface behaviorRecordsOptions {

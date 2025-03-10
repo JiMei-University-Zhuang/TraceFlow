@@ -1,4 +1,4 @@
-import { PageInformation } from '../core/types';
+import { PageInformation } from '../types/types';
 
 export const utils = {
   version: '1.0.0',
