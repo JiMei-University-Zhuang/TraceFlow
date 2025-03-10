@@ -17,13 +17,30 @@ const getRequestMonitor = (config: Config) => {
       response => {
         const { metadata } = response.config as CustomRequestConfig;
         if (metadata?.startTime) {
-          console.log(`请求耗时：${Date.now() - metadata.startTime}ms`);
+          const sdkdata = {
+            timestamp: Date.now(),
+            url: response.config.url,
+            method: response.config.method,
+            status: response.status,
+            duration: performance.now() - metadata.startTime,
+          };
+          console.log({ requestMonitor: sdkdata }); //后续替换为上报
         }
         return response;
       },
       error => {
-        const duration = performance.now() - error.config.metadata.startTime;
-        console.log(`请求失败：${error.message}，耗时：${duration}ms`);
+        const { metadata } = error.config as CustomRequestConfig;
+        if (metadata?.startTime) {
+          const errordata = {
+            timestamp: Date.now(),
+            url: error.config.url,
+            method: error.config.method,
+            status: error.response.status,
+            duration: performance.now() - metadata.startTime,
+            error: error.message,
+          };
+          console.log({ requestMonitor: errordata }); //后续替换为上报
+        }
         return Promise.reject(error);
       },
     );
