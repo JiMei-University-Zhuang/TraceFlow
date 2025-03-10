@@ -30,3 +30,26 @@ export interface OriginInformation {
   referrer: string;
   type: number | string;
 }
+
+//基础事件类型
+export type TrackEvent = {
+  eventType: string;
+  eventData?: Record<string, any>;
+  timeStamp?: number;
+  pageUrl?: string;
+  userId?: string;
+};
+
+//上报函数类型
+export type ReportHandler = (event: TrackEvent) => void;
+
+//SDK配置类型
+export interface TrackerConfig {
+  report: ReportHandler;
+  autoTrack?: {
+    pageView?: boolean;
+    click?: boolean;
+    componentLifeCycle?: boolean;
+  };
+  userId?: string;
+}

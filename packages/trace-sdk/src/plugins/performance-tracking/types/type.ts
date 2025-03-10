@@ -13,7 +13,7 @@ export interface Config {
 }
 
 export interface CustomRequestConfig extends InternalAxiosRequestConfig {
-  metadata?: {
+  metaData?: {
     startTime: number;
     traceId?: string;
   };
