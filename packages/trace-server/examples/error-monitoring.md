@@ -11,30 +11,76 @@
 - **接口**: `POST /error-monitoring/report`
 - **功能**: 接收并保存错误报告
 - **请求体格式**:
-  ```typescript
+  ```json
   {
-    message: string;     // 错误消息
-    type: string;       // 错误类型
-    stack: string;      // 错误堆栈信息
-    userAgent?: string; // 用户代理信息（可选）
-    timestamp: number;  // 错误发生时间戳
-    userId?: string;    // 用户ID（可选）
-    environment?: string; // 环境信息（可选）
+    "message": "页面加载失败",
+    "type": "Error",
+    "stack": "Error: 页面加载失败\n    at loadPage (/src/pages/index.tsx:25:7)",
+    "userAgent": "Mozilla/5.0 (Macintosh)",
+    "timestamp": 1709989200000,
+    "userId": "user123",
+    "environment": "production"
   }
   ```
 - **响应格式**:
+  ```json
+  {
+    "success": true,
+    "message": "错误报告保存成功",
+    "data": {
+      "errorId": 1
+    }
+  }
+  ```
+
+### 2. 错误查询
+
+- **接口**: `GET /error-monitoring/query`
+- **功能**: 分页查询错误报告，支持多种过滤条件
+- **请求参数**:
   ```typescript
   {
-    success: boolean; // 操作是否成功
-    message: string; // 响应消息
-    errorId: number; // 错误ID
+    startTime?: number;    // 开始时间戳
+    endTime?: number;      // 结束时间戳
+    type?: ErrorType;      // 错误类型
+    userId?: string;       // 用户ID
+    page?: number;         // 页码，默认1
+    pageSize?: number;     // 每页数量，默认20
+  }
+  ```
+- **响应格式**:
+  ```json
+  {
+    "items": [ErrorReportDto],
+    "total": 100,
+    "page": 1,
+    "pageSize": 20,
+    "totalPages": 5
+  }
+  ```
+
+### 3. 错误统计
+
+- **接口**: `GET /error-monitoring/stats`
+- **功能**: 获取错误统计信息
+- **响应格式**:
+  ```json
+  {
+    "totalErrors": 100,
+    "errorsByType": {
+      "Error": 50,
+      "Warning": 30,
+      "Info": 20
+    },
+    "uniqueUsers": 45
   }
   ```
 
 ## 使用示例
 
+### 1. 发送错误报告
+
 ```typescript
-// 发送错误报告
 const errorReport = {
   message: '页面加载失败',
   type: 'Error',
@@ -45,13 +91,51 @@ const errorReport = {
   environment: 'production',
 };
 
-await fetch('http://your-api-host/error-monitoring/report', {
+const response = await fetch('http://your-api-host/error-monitoring/report', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
   },
   body: JSON.stringify(errorReport),
 });
+
+const result = await response.json();
+console.log('错误报告ID:', result.data.errorId);
+```
+
+### 2. 查询错误报告
+
+```typescript
+// 查询过去24小时内的Error类型错误
+const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+const queryParams = new URLSearchParams({
+  startTime: oneDayAgo.toString(),
+  type: 'Error',
+  page: '1',
+  pageSize: '20',
+});
+
+const response = await fetch(
+  `http://your-api-host/error-monitoring/query?${queryParams}`,
+);
+const result = await response.json();
+
+console.log('总错误数:', result.total);
+console.log('当前页错误:', result.items);
+```
+
+### 3. 获取错误统计
+
+```typescript
+// 获取错误统计信息
+const response = await fetch('http://your-api-host/error-monitoring/stats');
+const stats = await response.json();
+
+console.log('总错误数:', stats.totalErrors);
+console.log('各类型错误数:', stats.errorsByType);
+console.log('受影响用户数:', stats.uniqueUsers);
+```
+
 ```
 
 ## 后续开发计划
@@ -63,15 +147,15 @@ await fetch('http://your-api-host/error-monitoring/report', {
 
 2. 错误查询功能
 
-   - [ ] 添加按时间范围查询接口
-   - [ ] 添加按错误类型查询接口
-   - [ ] 支持分页查询
+   - [x] 添加按时间范围查询接口
+   - [x] 添加按错误类型查询接口
+   - [x] 支持分页查询
 
 3. 统计分析功能
 
-   - [ ] 错误频率统计
-   - [ ] 错误类型分布
-   - [ ] 影响用户数统计
+   - [x] 错误频率统计（总错误数）
+   - [x] 错误类型分布
+   - [x] 影响用户数统计
 
 4. 告警机制
    - [ ] 配置告警规则
@@ -93,3 +177,4 @@ await fetch('http://your-api-host/error-monitoring/report', {
 3. 安全性
    - 接口访问权限控制
    - 数据加密传输
+```
