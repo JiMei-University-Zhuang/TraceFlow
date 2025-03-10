@@ -1,21 +1,19 @@
 import { onCLS, onFCP, onLCP, onTTFB } from 'web-vitals';
 import { Callback } from '../types';
 
-function getWebVitals(callback: Callback): void {
-  {
-    onCLS(res => {
-      callback(res);
-    });
-    onFCP(res => {
-      callback(res);
-    });
-    onLCP(res => {
-      callback(res);
-    });
-    onTTFB(res => {
-      callback(res);
-    });
-  }
+async function getWebVitals(callback: Callback): Promise<void> {
+  const [CLS, FCP, LCP, TTFB] = await Promise.all([
+    new Promise(resolve => onCLS(res => resolve(res.value))),
+    new Promise(resolve => onFCP(res => resolve(res.value))),
+    new Promise(resolve => onLCP(res => resolve(res.value))),
+    new Promise(resolve => onTTFB(res => resolve(res.value))),
+  ]);
+  callback({
+    LCP: LCP,
+    FCP: FCP,
+    TTFB: TTFB,
+    CLS: CLS,
+  });
 }
 
 export const initWebVitals = (callback: Callback): void => {

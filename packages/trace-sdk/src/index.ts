@@ -14,5 +14,8 @@ export const TraceSDK = {
     errorTracking.init();
     EventTracking.length;
     performanceTracking.init(console.log);
+    const http = performanceTracking.initaxios({ url: '/api/v1/test' });
+    http.get('/api/v1/test');
   },
 };
+TraceSDK.init();
