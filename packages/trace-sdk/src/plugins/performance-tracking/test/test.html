@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="../../../../dist/bundle.js"></script>
+    <title>标准HTML模板</title>
+  </head>
+  <body>
+    <div>
+      <h1>性能监控测试页面</h1>
+    </div>
+    
+    <div>
+      <button>测试按钮1</button>
+      <button>测试按钮2</button>
+      <img src="./test.png" alt="test"/>
+    </div>
+
+     <script>
+      MyLibrary.init();
+      const http=MyLibrary.initAxios();
+      http.get('/api/test');
+      
+      setTimeout(() => {
+        const start = Date.now();
+        while (Date.now() - start < 60) {} 
+      }, 1000);
+    </script>
+  </body>
+</html>

@@ -1,17 +1,25 @@
 import { errorTracking } from './plugins/error-tracking/index';
-import { eventTracking } from './plugins/event-tracking/index';
+import { EventTracking } from './plugins/event-tracking/index';
+
 import { performanceTracking } from './plugins/performance-tracking/index';
 import { utils } from './utils/index';
+import { Tracker } from './core/Tracker';
 
-export const TraceSDK = {
+const TraceSDK = {
   ...utils,
   errorTracking,
-  eventTracking,
+  EventTracking,
   performanceTracking,
   init: () => {
     utils.init();
     errorTracking.init();
-    eventTracking.init();
-    performanceTracking.init();
+    EventTracking.length;
+    performanceTracking.init(console.log);
+  },
+  initAxios: () => {
+    return performanceTracking.initAxios();
   },
 };
+export default TraceSDK;
+
+export { Tracker };
