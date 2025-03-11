@@ -22,6 +22,12 @@ body {
   align-items: center; 
  }
 
+ .logo-png{
+  width: 70px;
+  height: 70px;
+  padding: 10px 5px 5px 5px;
+ }
+
 /* 文字渐变效果 */
 .text-gradient {
   background: linear-gradient(45deg, #ffffff 0%, #ebeff3 100%);
