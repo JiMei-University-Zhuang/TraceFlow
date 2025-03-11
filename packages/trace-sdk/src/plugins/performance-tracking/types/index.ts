@@ -5,7 +5,7 @@ export interface Callback {
 }
 
 export interface Config {
-  url: string;
+  url?: string;
   baseURL?: string;
   timeout?: number;
   method?: string;
