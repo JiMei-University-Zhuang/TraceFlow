@@ -3,6 +3,7 @@ import { EventTracking } from './plugins/event-tracking/index';
 
 import { performanceTracking } from './plugins/performance-tracking/index';
 import { utils } from './utils/index';
+import { Tracker } from './core/Tracker';
 
 export const TraceSDK = {
   ...utils,
@@ -16,3 +17,5 @@ export const TraceSDK = {
     performanceTracking.init(console.log);
   },
 };
+
+export { Tracker };
