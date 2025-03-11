@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SDK Test Page</title>
+  <!-- 引入打包后的SDK -->
+  <script src="../dist/bundle.js"></script>
+</head>
+<body>
+  <h1>Tracker SDK 测试页面</h1>
+  
+  <!-- 自动埋点测试按钮 -->
+  <button data-track-event="test_auto_click">自动点击上报测试</button>
+
+  <!-- 手动上报测试区域 -->
+  <div>
+    <button id="manualBtn">手动上报测试</button>
+    <button id="pageViewBtn">触发页面浏览上报</button>
+  </div>
+
+  <script>
+    // 初始化SDK
+    const tracker = new MyLibrary.Tracker({
+      report: (event) => {
+        // 打印上报数据到控制台
+        console.log('[REPORT]', event);
+       
+      },
+      userId: 'test_user_123',
+      autoTrack: {
+        click: true,
+        pageView: true
+      }
+    });
+
+    // 手动上报测试
+    document.getElementById('manualBtn').addEventListener('click', () => {
+      tracker.trackEvent('custom_event', {
+        action: 'manual_trigger',
+        value: Date.now()
+      });
+    });
+
+    // 主动触发页面浏览上报
+    document.getElementById('pageViewBtn').addEventListener('click', () => {
+      tracker.trackPageView('/custom-path');
+    });
+
+    // 模拟页面切换
+    let pageIndex = 1;
+    window.addEventListener('hashchange', () => {
+      tracker.trackPageView(window.location.hash.slice(1));
+    });
+  </script>
+</body>
+</html>
