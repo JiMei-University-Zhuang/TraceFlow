@@ -11,7 +11,7 @@ export default {
   output: {
     file: 'dist/bundle.js', // 输出文件路径
     format: 'umd', // UMD格式，适用于浏览器和Node.js
-    name: 'MyLibrary', // 全局变量名
+    name: 'TraceSDK', // 全局变量名
     sourcemap: true, // 启用sourcemap，方便调试
     globals: {
       axios: 'axios', // 声明外部依赖的全局变量名
