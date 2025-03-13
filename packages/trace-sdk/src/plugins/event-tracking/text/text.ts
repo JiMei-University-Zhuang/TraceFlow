@@ -1,5 +1,4 @@
-import { EventTracking } from "..";
-
+import { EventTracking } from '..';
 
 const text = new EventTracking();
 console.log(text);

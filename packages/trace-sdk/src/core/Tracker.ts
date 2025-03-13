@@ -1,4 +1,4 @@
-import { TrackerConfig, TrackEvent } from './types';
+import { TrackerConfig, TrackEvent } from '../plugins/event-tracking/types/types';
 export class Tracker {
   private config: TrackerConfig;
 
