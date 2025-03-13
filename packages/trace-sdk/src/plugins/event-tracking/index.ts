@@ -4,7 +4,7 @@ import { getExtends, getPageInfo } from './core/getpage';
 import { getOriginInfo, proxyHash, proxyHistory, wrHistory } from './core/eventTracker';
 import { timeStamp } from 'console';
 import behaviorStore from './core/behaviorStore';
-import { proxyXmlHttp } from './core/httpInterceptor';
+import { proxyFetch, proxyXmlHttp } from './core/httpInterceptor';
 
 const PI = metricsName.PI;
 const RCR = metricsName.RCR;
@@ -135,5 +135,6 @@ export class EventTracking {
       });
     };
     proxyXmlHttp(null, loadHandler);
+    proxyFetch(null, loadHandler);
   };
 }
