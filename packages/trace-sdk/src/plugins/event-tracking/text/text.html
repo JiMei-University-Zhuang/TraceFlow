@@ -14,6 +14,7 @@
     <button id="goBackButton">Go Back</button>
     <button class="sb">点击我</button>
     <button id="testBtn">发起请求</button>
+    <button id="simulateBeforeUnload">模拟关闭页面</button>
     <script type="module" src="../../../../dist/bundle.js"></script>
     <script>
       document.getElementById('pushStateButton').addEventListener('click', () => {
@@ -42,6 +43,10 @@
         console.log('收到响应：', xhr.responseText);
       };
       xhr.send();
+    });
+    document.getElementById('simulateBeforeUnload').addEventListener('click', () => {
+      console.log('模拟关闭页面');
+      window.dispatchEvent(new Event('beforeunload'));
     });
     </script>
   </body>

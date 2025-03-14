@@ -52,7 +52,7 @@ export const proxyXmlHttp = (sendHandler: Function | null | undefined, loadHandl
   }
 };
 
-
+//调用proxyFetch完成全局监听fetch
 export const proxyFetch = (sendHandler:Function | null |undefined,loadHandler:Function) => {
   if ('fetch' in window && typeof window.fetch === 'function') {
     const oFetch = window.fetch;
