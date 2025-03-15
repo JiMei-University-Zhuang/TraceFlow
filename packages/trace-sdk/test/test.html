@@ -1,56 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>SDK Test Page</title>
-  <!-- 引入打包后的SDK -->
-  <script src="../dist/bundle.js"></script>
+    <meta charset="UTF-8">
+    <title>Tracker SDK 测试页面</title>
+        
 </head>
 <body>
-  <h1>Tracker SDK 测试页面</h1>
-  
-  <!-- 自动埋点测试按钮 -->
-  <button data-track-event="test_auto_click">自动点击上报测试</button>
+    <h1>Tracker SDK 测试</h1>
 
-  <!-- 手动上报测试区域 -->
-  <div>
-    <button id="manualBtn">手动上报测试</button>
-    <button id="pageViewBtn">触发页面浏览上报</button>
-  </div>
+    <div id="queueStatus">
+        <div>立即队列: <span id="immediateCount">0</span></div>
+        <div>批量队列: <span id="batchCount">0</span></div>
+    </div>
 
-  <script>
-    // 初始化SDK
-    const tracker = new TraceSDK.Tracker({
-      report: (event) => {
-        // 打印上报数据到控制台
-        console.log('[REPORT]', event);
-       
-      },
-      userId: 'test_user_123',
-      autoTrack: {
-        click: true,
-        pageView: true
-      }
-    });
+    <div class="test-section">
+        <h3>自动点击跟踪测试</h3>
+        <button data-track-event="test_button">测试按钮 (带data-track-event)</button>
+        <button>普通按钮 (无跟踪)</button>
+    </div>
 
-    // 手动上报测试
-    document.getElementById('manualBtn').addEventListener('click', () => {
-      tracker.trackEvent('custom_event', {
-        action: 'manual_trigger',
-        value: Date.now()
-      });
-    });
+    <div class="test-section">
+        <h3>手动上报测试</h3>
+        <button onclick="trackCustomEvent()">触发自定义事件</button>
+        <button onclick="trackCheckout()">触发结账事件</button>
+    </div>
 
-    // 主动触发页面浏览上报
-    document.getElementById('pageViewBtn').addEventListener('click', () => {
-      tracker.trackPageView('/custom-path');
-    });
+    <div class="test-section">
+        <h3>性能数据测试</h3>
+        <button onclick="simulatePerformance()">模拟性能数据</button>
+    </div>
 
-    // 模拟页面切换
-    let pageIndex = 1;
-    window.addEventListener('hashchange', () => {
-      tracker.trackPageView(window.location.hash.slice(1));
-    });
-  </script>
+    <div class="test-section">
+        <h3>行为上报测试</h3>
+        <button onclick="trackPageView()">上报页面浏览</button>
+        <button onclick="trackUserBehavior()">上报用户行为</button>
+    </div>
+
+    <script src="../dist/bundle.js"></script>
+    <script>
+        // 初始化跟踪器
+        const tracker = new TraceSDK.Tracker({
+            endpoint: 'http://127.0.0.1:3000',
+            userId: 'test_user_123',
+            autoTrack: {
+                click: true,
+                performance: true
+            }
+        });
+
+        // 手动事件测试
+        function trackCustomEvent() {
+            tracker.trackEvent('custom', {
+                action: 'manual_click',
+                value: Math.random().toFixed(2)
+            });
+            console.log('已触发自定义事件上报');
+        }
+
+        function trackCheckout() {
+            tracker.trackEvent('checkout', {
+                amount: 199.9,
+                currency: 'CNY'
+            }, true);
+        }
+
+        // 性能数据模拟
+        function simulatePerformance() {
+            const mockData = {
+                lcp: 1800 + Math.random() * 1000,
+                fid: 50 + Math.random() * 50,
+                cls: 0.1 + Math.random() * 0.2
+            };
+            tracker.onPerformanceData(mockData);
+            console.log('性能数据已发送:', mockData);
+        }
+
+        // 行为上报测试
+        function trackPageView() {
+            tracker.reportBehavior('pv', {
+                path: location.pathname,
+                referrer: document.referrer
+            });
+        }
+
+        function trackUserBehavior() {
+            tracker.reportBehavior('user_action', {
+                action_type: 'video_play',
+                duration: 120,
+                video_id: 'x_123456'
+            }, true);
+        }
+
+        // 队列状态监控
+        setInterval(() => {
+            document.getElementById('immediateCount').textContent = tracker.immediateQueue.length;
+            document.getElementById('batchCount').textContent = tracker.batchQueue.length;
+        }, 500);
+    </script>
 </body>
 </html>

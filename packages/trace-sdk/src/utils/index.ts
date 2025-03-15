@@ -21,3 +21,7 @@ export const getPageInfo = (): PageInformation => {
     docScreen: `${document.documentElement.clientWidth}×${document.documentElement.clientHeight}`,
   };
 };
+
+export function generateUniqueId(): string {
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}

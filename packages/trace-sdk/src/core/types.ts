@@ -35,9 +35,10 @@ export interface OriginInformation {
 export type TrackEvent = {
   eventType: string;
   eventData?: Record<string, any>;
-  timeStamp?: number;
-  pageUrl?: string;
+  timeStamp: number;
+  pageUrl: string;
   userId?: string;
+  attempts?: number; //重试次数
 };
 
 //上报函数类型
@@ -45,11 +46,20 @@ export type ReportHandler = (event: TrackEvent) => void;
 
 //SDK配置类型
 export interface TrackerConfig {
-  report: ReportHandler;
+  endpoint: string;
   autoTrack?: {
-    pageView?: boolean;
-    click?: boolean;
-    componentLifeCycle?: boolean;
+    pageView?: boolean; //自动跟踪页面访问
+    click?: boolean; //自动跟踪点击事件
+    performance?: boolean; //自动跟踪性能指标
   };
   userId?: string;
+  reportStrategy?: 'BEACON' | 'XHR' | 'IMG' | 'auto';
 }
+
+//上报方法：
+export type ReportStrategy = 'BEACON' | 'XHR' | 'IMG';
+
+export type ReportData = {
+  type: 'immediate' | 'batch';
+  data: Record<string, any>;
+};

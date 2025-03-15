@@ -6,6 +6,15 @@ import { getOriginInfo, proxyHash, proxyHistory, wrHistory } from './monitoring/
 const PI = metricsName.PI;
 const RCR = metricsName.RCR;
 export class EventTracking {
+  private static instance: EventTracking | null = null;
+
+  public static init(): EventTracking {
+    if (!EventTracking.instance) {
+      EventTracking.instance = new EventTracking();
+    }
+    return EventTracking.instance;
+  }
+
   //本地暂存数据Map
   private metrics: UserMetricsStore;
   constructor() {
