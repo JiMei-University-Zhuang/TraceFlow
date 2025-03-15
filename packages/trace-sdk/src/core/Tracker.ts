@@ -1,4 +1,5 @@
 import { TrackerConfig, TrackEvent, ReportStrategy } from './types';
+
 export class Tracker {
   private config: TrackerConfig;
   private immediateQueue: TrackEvent[] = [];
@@ -6,6 +7,9 @@ export class Tracker {
   private readonly BATCH_LIMIT = 20; //上报限制
   private readonly BATCH_INTERVAL = 5000; //每五秒批量上报
   private isUnloading = false;
+
+  // 新增防抖定时器变量
+  private clickTimer: number | null = null;
 
   constructor(config: TrackerConfig) {
     this.config = {
@@ -18,7 +22,6 @@ export class Tracker {
       reportStrategy: 'auto',
       ...config,
     };
-
     this.initAutoTrack();
     this.initBatchFlush();
     this.initPageUnload();
@@ -29,47 +32,51 @@ export class Tracker {
     if (this.config.autoTrack?.click) {
       document.addEventListener('click', this.handleAutoClick, true);
     }
-
-    if (this.config.autoTrack?.pageView) {
-      window.addEventListener('load', this.trackPageView);
-      window.addEventListener('hashchange', this.trackPageView);
-    }
   }
 
-  //自动上报点击事件逻辑
+  // 增添防抖节流的按钮点击事件处理函数
   private handleAutoClick = (e: MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (target?.dataset?.trackEvent) {
-      this.trackEvent('click', {
-        element: target.tagName,
-        content: target.textContent?.trim(),
-        eventName: target.dataset.trackEvent,
-      });
+    // 清除之前的定时器（防抖）
+    if (this.clickTimer) {
+      clearTimeout(this.clickTimer);
     }
+
+    // 设置新的定时器（延迟200ms处理）
+    this.clickTimer = window.setTimeout(() => {
+      const target = e.target as HTMLElement;
+      if (target?.dataset?.trackEvent) {
+        this.trackEvent('click', {
+          element: target.tagName,
+          content: target.textContent?.trim(),
+          eventName: target.dataset.trackEvent,
+        });
+      }
+      this.clickTimer = null;
+    }, 200); // 200ms内连续点击只触发最后一次
   };
+
+  //自动上报性能监控的逻辑
+  public onPerformanceData = (data: Record<string, number>) => {
+    this.trackEvent('performance', data, data.lcp > 2500);
+  };
+
+  //行为上报
+  public reportBehavior(type: string, data: Record<string, any>, immediate = type === 'pv') {
+    const event = this.createBaseEvent(`behavior_${type}`, {
+      ...data,
+      _track_time: Date.now(),
+      _user: this.config.userId,
+    });
+
+    // 复用现有队列逻辑
+    this.enqueueEvent(event, immediate);
+  }
 
   //手动上报
   public trackEvent = (eventType: string, eventData?: Record<string, any>, isImmediate = false) => {
     const event = this.createBaseEvent(eventType, eventData);
     //进入队列分配流程
     this.enqueueEvent(event, isImmediate);
-  };
-
-  public trackPageView = (event?: Event) => {
-    let path = window.location.pathname;
-
-    // 处理hash变化
-    if (event?.type === 'hashchange') {
-      path += window.location.hash;
-    }
-
-    this.trackEvent(
-      'pageView',
-      {
-        pagePath: path,
-      },
-      true,
-    );
   };
 
   // ==================== 定时任务 ====================
@@ -102,7 +109,7 @@ export class Tracker {
   }
 
   private isCriticalEvent(event: TrackEvent): boolean {
-    return ['error', 'purchase', 'checkout'].includes(event.eventType);
+    return ['error', 'purchase', 'checkout', 'behavior_pv'].includes(event.eventType);
   }
 
   private flushImmediateQueue() {
