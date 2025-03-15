@@ -1,43 +1,75 @@
-import { IsOptional, IsString, IsNumber, Min, IsEnum } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsNumber,
+  IsDateString,
+  IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-
-export enum ErrorType {
-  ERROR = 'Error',
-  TYPE_ERROR = 'TypeError',
-  REFERENCE_ERROR = 'ReferenceError',
-  SYNTAX_ERROR = 'SyntaxError',
-  RANGE_ERROR = 'RangeError',
-  OTHER = 'Other',
-}
+import { ErrorSeverity, ErrorCategory } from './error-report.dto';
 
 export class ErrorQueryDto {
   @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  startTime?: number;
+  @IsString()
+  appId?: string;
+
+  @IsOptional()
+  @IsEnum(ErrorSeverity)
+  severity?: ErrorSeverity;
+
+  @IsOptional()
+  @IsEnum(ErrorCategory)
+  category?: ErrorCategory;
+
+  @IsOptional()
+  @IsString()
+  errorUid?: string;
+
+  @IsOptional()
+  @IsString()
+  userId?: string;
+
+  @IsOptional()
+  @IsString()
+  environment?: string;
+
+  @IsOptional()
+  @IsString()
+  release?: string;
+
+  @IsOptional()
+  @IsDateString()
+  startTime?: string;
+
+  @IsOptional()
+  @IsDateString()
+  endTime?: string;
+
+  @IsOptional()
+  @IsString()
+  searchText?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  endTime?: number;
-
-  @IsOptional()
-  @IsEnum(ErrorType)
-  type?: ErrorType;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(1)
   page?: number = 1;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @Min(1)
   pageSize?: number = 20;
 
   @IsOptional()
   @IsString()
-  userId?: string;
+  sortBy?: 'timestamp' | 'severity' | 'category' = 'timestamp';
+
+  @IsOptional()
+  @IsString()
+  sortOrder?: 'asc' | 'desc' = 'desc';
 }
