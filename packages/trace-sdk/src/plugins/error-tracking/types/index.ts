@@ -102,7 +102,7 @@ export const errorEventTypes = {
 export type ErrorEventType = (typeof errorEventTypes)[keyof typeof errorEventTypes];
 
 // 错误事件数据结构
-export interface ErrorEvent {
+export interface ExceptionMetrics {
   // 基础错误信息
   type: ErrorEventType;
   message: string;
@@ -126,6 +126,17 @@ export interface ErrorEvent {
     data?: Record<string, unknown>;
   };
 
+  // 错误分类和严重程度
+  severity: ErrorSeverity;
+  category: ErrorCategory;
+  context: ErrorContext;
+
+  // 采样信息
+  sampling?: {
+    rate: number;
+    isSelected: boolean;
+  };
+
   // 用户行为跟踪
   breadcrumbs?: Array<behaviorStack>;
   pageInformation?: unknown;
@@ -143,7 +154,7 @@ export interface ErrorReport {
   timestamp: number;
 
   // 错误信息
-  errors: ErrorEvent[];
+  errors: ExceptionMetrics[];
   batchId?: string; // 批量上报的ID
 
   // 统计信息
@@ -198,5 +209,44 @@ export type User = {
 // 错误处理函数类型
 export type ErrorHandler = (error: unknown) => void;
 
-// 使用 ErrorEvent 作为基础错误事件类型
-export { ErrorEvent as ExceptionMetrics };
+// 错误严重程度
+export enum ErrorSeverity {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+// 错误分类
+export enum ErrorCategory {
+  RUNTIME = 'runtime',
+  NETWORK = 'network',
+  RESOURCE = 'resource',
+  PROMISE = 'promise',
+  SYNTAX = 'syntax',
+  SECURITY = 'security',
+  CUSTOM = 'custom',
+}
+
+// 错误上下文
+export interface ErrorContext {
+  severity: ErrorSeverity;
+  category: ErrorCategory;
+  tags?: Record<string, string>;
+  metadata?: Record<string, unknown>;
+  userId?: string;
+  sessionId?: string;
+  environment: string;
+  release?: string;
+  deviceInfo?: {
+    os: string;
+    browser: string;
+    device: string;
+    screenResolution?: string;
+  };
+  networkInfo?: {
+    effectiveType?: string;
+    downlink?: number;
+    rtt?: number;
+  };
+}

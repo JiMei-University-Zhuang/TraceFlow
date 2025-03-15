@@ -1,9 +1,9 @@
-import { ExceptionMetrics, mechanismType, errorEventTypes, EngineConfig, Breadcrumb, UserInstance, TransportInstance } from './types';
+import { ExceptionMetrics, EngineConfig, Breadcrumb, UserInstance, TransportInstance } from './types';
 import { initJsError } from './core/js-error';
 import { initResourceError } from './core/resource-error';
 import { initPromiseError } from './core/promise-error';
 import { initHttpError } from './core/http-error';
-import { generateUniqueId } from '../../utils';
+import { EnhancedErrorHandler } from './core/enhanced-error-handler';
 
 interface ErrorTrackingConfig {
   appId: string;
@@ -13,6 +13,10 @@ interface ErrorTrackingConfig {
   batchTimeout?: number;
   queueSize?: number;
   errorFilter?: (error: unknown) => boolean;
+  samplingRate?: number;
+  environment?: string;
+  release?: string;
+  tags?: Record<string, string>;
 }
 
 interface EngineInstance extends EngineConfig {
@@ -27,6 +31,10 @@ interface EngineInstance extends EngineConfig {
   transportCategory: string;
   userInstance: UserInstance;
   transportInstance: TransportInstance;
+  samplingRate?: number;
+  environment?: string;
+  release?: string;
+  tags?: Record<string, string>;
 }
 
 class ErrorQueue {
@@ -71,6 +79,7 @@ class ErrorTracking {
   private reportQueue!: ErrorQueue;
   private persistQueue!: ErrorQueue;
   private initialized: boolean = false;
+  private errorHandler!: EnhancedErrorHandler;
 
   private constructor() {}
 
@@ -88,6 +97,15 @@ class ErrorTracking {
     }
 
     this.engineInstance = engineInstance;
+
+    // 初始化增强的错误处理器
+    this.errorHandler = new EnhancedErrorHandler({
+      samplingRate: engineInstance.samplingRate || 1.0,
+      maxQueueSize: engineInstance.queueSize || 100,
+      environment: engineInstance.environment || 'production',
+      release: engineInstance.release,
+      tags: engineInstance.tags,
+    });
 
     // 从配置中获取队列大小
     const queueSize = engineInstance?.queueSize || 100;
@@ -189,12 +207,16 @@ class ErrorTracking {
   }
 
   // 错误上报处理
-  private errorSendHandler(error: Error | ExceptionMetrics): void {
+  private errorSendHandler = (error: Error | ExceptionMetrics): void => {
     try {
-      const errorEvent = error instanceof Error ? this.buildErrorEvent(error) : error;
+      const errorEvent = error instanceof Error ? this.errorHandler.handleError(error) : error;
+
+      if (!errorEvent) return; // 如果错误被采样过滤，直接返回
+
       if (this.engineInstance.errorFilter && !this.engineInstance.errorFilter(errorEvent)) {
         return;
       }
+
       // 错误去重
       if (this.submitErrorUids.has(errorEvent.errorUid)) {
         return;
@@ -206,27 +228,7 @@ class ErrorTracking {
     } catch (e) {
       console.error('Error handling failed:', e);
     }
-  }
-
-  private buildErrorEvent(error: Error): ExceptionMetrics {
-    return {
-      type: errorEventTypes.JS_ERROR,
-      message: error.message,
-      stack: error.stack,
-      timestamp: Date.now(),
-      errorUid: generateUniqueId(),
-      url: window.location.href,
-      userAgent: navigator.userAgent,
-      platform: navigator.platform,
-      mechanism: {
-        type: mechanismType.JS,
-        handled: true,
-      },
-      meta: {
-        name: error.name,
-      },
-    };
-  }
+  };
 
   // 获取浏览器信息
   private getBrowserInfo(): { name: string; version: string } {
@@ -256,8 +258,10 @@ class ErrorTracking {
     }
 
     try {
-      const errorEvent: ExceptionMetrics = this.buildErrorEvent(error);
-      this.errorSendHandler(errorEvent);
+      const errorEvent = this.errorHandler.handleError(error);
+      if (errorEvent) {
+        this.errorSendHandler(errorEvent);
+      }
     } catch (e) {
       console.error('Failed to report error:', e);
     }
@@ -341,6 +345,10 @@ export const errorTracking = {
   init(config: ErrorTrackingConfig): ErrorTracking {
     const engineInstance: EngineInstance = {
       transportCategory: 'error',
+      environment: config.environment || 'production',
+      samplingRate: config.samplingRate,
+      release: config.release,
+      tags: config.tags,
       userInstance: {
         breadcrumbs: {
           get: () => [],
