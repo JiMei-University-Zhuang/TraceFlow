@@ -1,180 +1,316 @@
-# 错误监控模块
+# 错误监控 API 文档
 
-## 功能概述
+## 概述
 
-错误监控模块用于收集、存储和分析应用程序运行时的错误信息。通过这个模块，我们可以及时发现和处理应用程序中出现的问题。
+错误监控模块提供了一套完整的错误跟踪和分析功能，支持捕获、存储、查询和统计各类错误信息。
 
-## 接口说明
+## API 端点
 
-### 1. 错误报告提交
+### 1. 上报错误
 
-- **接口**: `POST /error-monitoring/report`
-- **功能**: 接收并保存错误报告
-- **请求体格式**:
-  ```json
-  {
-    "message": "页面加载失败",
-    "type": "Error",
-    "stack": "Error: 页面加载失败\n    at loadPage (/src/pages/index.tsx:25:7)",
-    "userAgent": "Mozilla/5.0 (Macintosh)",
-    "timestamp": 1709989200000,
-    "userId": "user123",
-    "environment": "production"
+```http
+POST /error-monitoring/report
+```
+
+上报一个新的错误事件。
+
+#### 请求体
+
+```typescript
+{
+  type: string;              // 错误类型
+  message: string;           // 错误消息
+  stack?: string;           // 错误堆栈（可选）
+  timestamp: number;        // 时间戳
+  errorUid: string;         // 错误唯一标识
+  url: string;              // 发生错误的URL
+  userAgent: string;        // 用户代理
+  platform: string;         // 平台信息
+  appId: string;           // 应用ID
+  context: {
+    severity: ErrorSeverity;    // 错误严重程度
+    category: ErrorCategory;    // 错误类别
+    environment: string;        // 环境
+    sessionId: string;         // 会话ID
+    userId?: string;           // 用户ID（可选）
+    tags?: Record<string, string>;  // 标签
+    deviceInfo?: {             // 设备信息
+      os: string;
+      browser: string;
+      device: string;
+      screenResolution?: string;
+    };
+    networkInfo?: {           // 网络信息
+      effectiveType?: string;
+      downlink?: number;
+      rtt?: number;
+    };
+  };
+  mechanism: {              // 错误机制
+    type: string;
+    handled: boolean;
+    data?: Record<string, unknown>;
+  };
+  meta: Record<string, unknown>;  // 元数据
+}
+```
+
+#### 响应
+
+```typescript
+{
+  success: boolean;
+  data: ErrorReport;
+  message: string;
+}
+```
+
+### 2. 查询错误
+
+```http
+GET /error-monitoring/query
+```
+
+查询错误记录，支持多维度过滤和分页。
+
+#### 查询参数
+
+```typescript
+{
+  appId?: string;           // 应用ID
+  severity?: ErrorSeverity;  // 错误严重程度
+  category?: ErrorCategory;  // 错误类别
+  errorUid?: string;        // 错误唯一标识
+  userId?: string;          // 用户ID
+  environment?: string;     // 环境
+  release?: string;         // 发布版本
+  startTime?: string;       // 开始时间
+  endTime?: string;         // 结束时间
+  searchText?: string;      // 搜索文本
+  tags?: string[];          // 标签
+  page?: number;           // 页码（默认：1）
+  pageSize?: number;       // 每页大小（默认：20）
+  sortBy?: string;         // 排序字段
+  sortOrder?: 'asc' | 'desc'; // 排序方向
+}
+```
+
+#### 响应
+
+```typescript
+{
+  success: boolean;
+  data: {
+    data: ErrorReport[];
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  };
+  message: string;
+}
+```
+
+### 3. 获取错误统计
+
+```http
+GET /error-monitoring/stats/:appId
+```
+
+获取指定应用的错误统计信息。
+
+#### 查询参数
+
+```typescript
+{
+  startTime?: string;  // 开始时间
+  endTime?: string;    // 结束时间
+}
+```
+
+#### 响应
+
+```typescript
+{
+  success: boolean;
+  data: {
+    total: number;
+    bySeverity: Record<ErrorSeverity, number>;
+    byCategory: Record<ErrorCategory, number>;
+    timeDistribution: Array<{
+      time: string;
+      count: number;
+    }>;
+    topErrors: Array<{
+      message: string;
+      category: ErrorCategory;
+      severity: ErrorSeverity;
+      count: number;
+      lastOccurrence: number;
+    }>;
   }
-  ```
-- **响应格式**:
-  ```json
-  {
-    "success": true,
-    "message": "错误报告保存成功",
-    "data": {
-      "errorId": 1
-    }
-  }
-  ```
+  message: string;
+}
+```
 
-### 2. 错误查询
+### 4. 获取错误详情
 
-- **接口**: `GET /error-monitoring/query`
-- **功能**: 分页查询错误报告，支持多种过滤条件
-- **请求参数**:
-  ```typescript
-  {
-    startTime?: number;    // 开始时间戳
-    endTime?: number;      // 结束时间戳
-    type?: ErrorType;      // 错误类型
-    userId?: string;       // 用户ID
-    page?: number;         // 页码，默认1
-    pageSize?: number;     // 每页数量，默认20
-  }
-  ```
-- **响应格式**:
-  ```json
-  {
-    "items": [ErrorReportDto],
-    "total": 100,
-    "page": 1,
-    "pageSize": 20,
-    "totalPages": 5
-  }
-  ```
+```http
+GET /error-monitoring/details/:errorUid
+```
 
-### 3. 错误统计
+获取指定错误的详细信息。
 
-- **接口**: `GET /error-monitoring/stats`
-- **功能**: 获取错误统计信息
-- **响应格式**:
-  ```json
-  {
-    "totalErrors": 100,
-    "errorsByType": {
-      "Error": 50,
-      "Warning": 30,
-      "Info": 20
-    },
-    "uniqueUsers": 45
+#### 响应
+
+```typescript
+{
+  success: boolean;
+  data?: ErrorReport;
+  message: string;
+}
+```
+
+### 5. 获取应用错误概览
+
+```http
+GET /error-monitoring/apps/:appId/summary
+```
+
+获取应用的错误概览信息。
+
+#### 查询参数
+
+```typescript
+{
+  period?: '24h' | '7d' | '30d';  // 时间范围（默认：24h）
+}
+```
+
+#### 响应
+
+```typescript
+{
+  success: boolean;
+  data: {
+    total: number;
+    bySeverity: Record<ErrorSeverity, number>;
+    byCategory: Record<ErrorCategory, number>;
+    timeDistribution: Array<{
+      time: string;
+      count: number;
+    }>;
+    topErrors: Array<{
+      message: string;
+      category: ErrorCategory;
+      severity: ErrorSeverity;
+      count: number;
+      lastOccurrence: number;
+    }>;
+    period: string;
+    startTime: string;
+    endTime: string;
   }
-  ```
+  message: string;
+}
+```
+
+## 错误类型定义
+
+### ErrorSeverity
+
+```typescript
+enum ErrorSeverity {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+```
+
+### ErrorCategory
+
+```typescript
+enum ErrorCategory {
+  RUNTIME = 'runtime',
+  NETWORK = 'network',
+  RESOURCE = 'resource',
+  PROMISE = 'promise',
+  SYNTAX = 'syntax',
+  SECURITY = 'security',
+  CUSTOM = 'custom',
+}
+```
 
 ## 使用示例
 
-### 1. 发送错误报告
+### 1. 上报错误
 
 ```typescript
 const errorReport = {
-  message: '页面加载失败',
-  type: 'Error',
-  stack: 'Error: 页面加载失败\n    at loadPage (/src/pages/index.tsx:25:7)',
-  userAgent: 'Mozilla/5.0 (Macintosh)',
+  type: 'error',
+  message: '无法加载资源',
+  stack: 'Error: 无法加载资源\n    at load (/app.js:10:15)',
   timestamp: Date.now(),
-  userId: 'user123',
-  environment: 'production',
+  errorUid: 'unique-error-id',
+  url: 'https://example.com/app',
+  userAgent: navigator.userAgent,
+  platform: navigator.platform,
+  appId: 'your-app-id',
+  context: {
+    severity: ErrorSeverity.HIGH,
+    category: ErrorCategory.RESOURCE,
+    environment: 'production',
+    sessionId: 'user-session-id',
+    userId: 'user-123',
+    tags: {
+      module: 'resource-loader',
+      version: '1.0.0',
+    },
+  },
+  mechanism: {
+    type: 'resource',
+    handled: false,
+  },
+  meta: {
+    resourceUrl: 'https://example.com/style.css',
+  },
 };
 
-const response = await fetch('http://your-api-host/error-monitoring/report', {
+await fetch('/error-monitoring/report', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
   },
   body: JSON.stringify(errorReport),
 });
-
-const result = await response.json();
-console.log('错误报告ID:', result.data.errorId);
 ```
 
-### 2. 查询错误报告
+### 2. 查询错误
 
 ```typescript
-// 查询过去24小时内的Error类型错误
-const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
 const queryParams = new URLSearchParams({
-  startTime: oneDayAgo.toString(),
-  type: 'Error',
+  appId: 'your-app-id',
+  severity: ErrorSeverity.HIGH,
+  startTime: '2024-03-15T00:00:00Z',
+  endTime: '2024-03-15T23:59:59Z',
   page: '1',
   pageSize: '20',
 });
 
-const response = await fetch(
-  `http://your-api-host/error-monitoring/query?${queryParams}`,
-);
+const response = await fetch(`/error-monitoring/query?${queryParams}`);
 const result = await response.json();
-
-console.log('总错误数:', result.total);
-console.log('当前页错误:', result.items);
 ```
 
 ### 3. 获取错误统计
 
 ```typescript
-// 获取错误统计信息
-const response = await fetch('http://your-api-host/error-monitoring/stats');
-const stats = await response.json();
+const appId = 'your-app-id';
+const startTime = '2024-03-15T00:00:00Z';
+const endTime = '2024-03-15T23:59:59Z';
 
-console.log('总错误数:', stats.totalErrors);
-console.log('各类型错误数:', stats.errorsByType);
-console.log('受影响用户数:', stats.uniqueUsers);
-```
-
-```
-
-## 后续开发计划
-
-1. 数据持久化
-
-   - [ ] 添加数据库存储支持
-   - [ ] 实现错误数据的定期清理
-
-2. 错误查询功能
-
-   - [x] 添加按时间范围查询接口
-   - [x] 添加按错误类型查询接口
-   - [x] 支持分页查询
-
-3. 统计分析功能
-
-   - [x] 错误频率统计（总错误数）
-   - [x] 错误类型分布
-   - [x] 影响用户数统计
-
-4. 告警机制
-   - [ ] 配置告警规则
-   - [ ] 支持多种告警方式（邮件、webhook等）
-   - [ ] 告警级别管理
-
-## 注意事项
-
-1. 错误报告中的敏感信息处理
-
-   - 确保不收集用户的敏感个人信息
-   - 对错误堆栈信息进行脱敏处理
-
-2. 性能考虑
-
-   - 大量错误报告时的处理策略
-   - 数据存储的优化方案
-
-3. 安全性
-   - 接口访问权限控制
-   - 数据加密传输
+const response = await fetch(
+  `/error-monitoring/stats/${appId}?startTime=${startTime}&endTime=${endTime}`,
+);
+const result = await response.json();
 ```
