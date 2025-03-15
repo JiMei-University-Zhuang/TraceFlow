@@ -1,194 +1,428 @@
-export enum mechanismType {
-  JS = 'js',
-  RS = 'resource',
-  UJ = 'unhandledrejection',
-  HP = 'http',
-  CS = 'cors',
-  REACT = 'react',
+import { ExceptionMetrics, mechanismType, errorEventTypes, EngineConfig, Breadcrumb, UserInstance, TransportInstance } from './types';
+import { initJsError } from './core/js-error';
+import { initResourceError } from './core/resource-error';
+import { initPromiseError } from './core/promise-error';
+import { initHttpError } from './core/http-error';
+import { generateUniqueId } from '../../utils';
+
+interface ErrorTrackingConfig {
+  appId: string;
+  reportUrl?: string;
+  batchReport?: boolean;
+  batchSize?: number;
+  batchTimeout?: number;
+  queueSize?: number;
+  errorFilter?: (error: unknown) => boolean;
 }
 
-export interface ExceptionMetrics {
-  mechanism: object;
-  value?: string;
-  type: string;
-  stackTrace?: object;
-  pageInformation?: object;
-  breadcrumbs?: Array<behaviorStack>;
-  errorUid: string;
-  meta?: any;
+interface EngineInstance extends EngineConfig {
+  appId: string;
+  reportUrl?: string;
+  batchReport?: boolean;
+  batchSize?: number;
+  batchTimeout?: number;
+  queueSize?: number;
+  persistQueueSize?: number;
+  errorFilter?: (error: unknown) => boolean;
+  transportCategory: string;
+  userInstance: UserInstance;
+  transportInstance: TransportInstance;
 }
 
-export interface ResourceErrorTarget {
-  src?: string;
-  tagName?: string;
-  outerHTML?: string;
-}
+class ErrorQueue {
+  private queue: Array<ExceptionMetrics>;
+  private maxSize: number;
 
-export interface httpMetrics {
-  method: string;
-  url: string | URL;
-  body: Document | XMLHttpRequestBodyInit | null | undefined | ReadableStream;
-  requestTime: number;
-  responseTime: number;
-  status: number;
-  statusText: string;
-  response?: any;
-}
-
-// 判断是 JS异常、静态资源异常、还是跨域异常
-export const getErrorKey = (event: ErrorEvent | Event) => {
-  const isJsError = event instanceof ErrorEvent;
-  if (!isJsError) return mechanismType.RS;
-  return event.message === 'Script error.' ? mechanismType.CS : mechanismType.JS;
-};
-
-export const getErrorUid = (input: string) => {
-  return window.btoa(encodeURIComponent(input));
-};
-
-export default class errorTracking {
-  private engineInstance: EngineInstance;
-  private submitErrorUids: Array<string>;
-
-  constructor(engineInstance: EngineInstance) {
-    this.engineInstance = engineInstance;
-    this.submitErrorUids = [];
-    // 初始化 js错误
-    this.initJsError();
-    // 初始化 静态资源加载错误
-    this.initResourceError();
-    // 初始化 Promise异常
-    this.initPromiseError();
-    // 初始化 HTTP请求异常
-    this.initHttpError();
+  constructor(maxSize: number = 100) {
+    this.queue = [];
+    this.maxSize = maxSize;
   }
-  //封装错误的上报入口，上报前判断错误是否已经发生过
-  errorSendHandler = (data: ExceptionMetrics) => {
-    //统一加上用户行为追踪和页面基本信息
-    const submitParams = {
-      ...data,
-      breadcrumbs: this.engineInstance.userInstance.breadcrumbs.get(),
-      pageInformation: this.engineInstance.userInstance.metrics.get('page-information'),
-    } as ExceptionMetrics;
 
-    //判断同一个错误在本次页面访问中是否已经发生过
-    const hasSubmitStatus = this.submitErrorUids.includes(submitParams.errorUid);
-    //检查一下错误在本次页面访问中是否已经产生过了
-    if (hasSubmitStatus) return; //如果已经产生过了就直接返回
-    this.submitErrorUids.push(submitParams.errorUid); //如果没有产生过就在submitErrorUids中记录
-    //记录之后清除breadcrumbs
-    this.engineInstance.userInstance.breadcrumbs.clear();
-    //一般来说，有报错就立刻上报
-    this.engineInstance.transportInstance.kernelTransportHandler(this.engineInstance.transportInstance.formatTransportData(transportCategory.ERROR, submitParams));
-  };
+  enqueue(error: ExceptionMetrics): void {
+    if (this.queue.length >= this.maxSize) {
+      this.queue.shift(); // 移除最早的错误
+    }
+    this.queue.push(error);
+  }
 
-  // 初始化 JS异常 的数据获取和上报
-  initJsError = (): void => {
-    const handler = (event: ErrorEvent) => {
-      //阻止向上抛出控制台报错
-      event.preventDefault();
-      //如果不是JS异常就结束
-      if (getErrorKey(event) !== mechanismType.JS) return;
-      const exception = {
-        mechanism: {
-          type: mechanismType.JS, //上报错误归类
-        },
-        value: event.message, // 错误信息
-        type: (event.error && event.error.name) || 'UnKnown', // 错误类型
-        stackTrace: {
-          frames: parseStackFrames(event.error), // 解析后的错误堆栈
-        },
-        errorUid: getErrorUid(`${mechanismType.JS}-${event.message}-${event.filename}`),
-        //附带信息
-        meta: {
-          file: event.filename, //错误所处的文件地址
-          col: event.colno,
-          row: event.lineno,
-        },
-      } as ExceptionMetrics;
-      //一般错误立刻上报，不用换存在本地
-      this.errorSendHandler(exception);
-    };
-    window.addEventListener('error', event => {
-      handler(event), true;
-    });
-  };
+  dequeue(): ExceptionMetrics | undefined {
+    return this.queue.shift();
+  }
 
-  // 初始化 静态资源异常 的数据获取和上报
-  initResourceError = (): void => {
-    const handler = (event: Event) => {
-      event.preventDefault(); //阻止向上抛出控制台报错
-      //如果不是跨域脚本异常，就结束
-      if (getErrorKey(event) !== mechanismType.RS) return;
-      const target = event.target as ResourceErrorTarget;
-      const exception = {
-        mechanism: {
-          type: mechanismType.RS,
-        },
-        //错误信息
-        value: '',
-        type: 'ResourceError',
-        errorUid: getErrorUid(`${mechanismType.RS}-${target.src}-${target.tagName}`),
-        meta: {
-          url: target.src,
-          html: target.outerHTML,
-          type: target.tagName,
-        },
-      } as ExceptionMetrics;
-      this.errorSendHandler(exception);
-    };
-    window.addEventListener('error', event => handler(event), true);
-  };
+  clear(): void {
+    this.queue = [];
+  }
 
-  // 初始化 Promise异常 的数据获取和上报
-  initPromiseError = (): void => {
-    const handler = (event: PromiseRejectionEvent) => {
-      event.preventDefault(); //阻止向上抛出控制台报错
-      const value = event.reason.message || event.reason;
-      const type = event.reason.name || 'UnKnown';
-      const exception = {
-        //上报错误归类
-        mechanism: {
-          type: mechanismType.UJ,
-        },
-        value, //错误信息
-        type, //错误类型
-        stackTrace: {
-          frames: parseStackFrames(event.reason),
-        },
-        errorUid: getErrorUid(`${mechanismType.UJ} - ${value} - ${type}`),
-        meta: {},
-      } as ExceptionMetrics;
-      this.errorSendHandler(exception);
-    };
-    window.addEventListener('unhandledrejection', event => handler(event), true);
-  };
+  size(): number {
+    return this.queue.length;
+  }
 
-  // 初始化 HTTP请求异常 的数据获取和上报
-  initHttpError = (): void => {
-    //... 详情代码在下
-    const loadHandler = (metrics: httpMetrics) => {
-      if (metrics.status < 400) return;
-      const value = metrics.response;
-      const exception = {
-        // 上报错误归类
-        mechanism: {
-          type: mechanismType.HP,
-        },
-        // 错误信息
-        value,
-        // 错误类型
-        type: 'HttpError',
-        // 错误的标识码
-        errorUid: getErrorUid(`${mechanismType.HP}-${value}-${metrics.statusText}`),
-        // 附带信息
-        meta: {
-          metrics,
-        },
-      } as ExceptionMetrics;
-      this.errorSendHandler(exception);
-    };
-    proxyXmlHttp(null, loadHandler);
-    proxyFetch(null, loadHandler);
-  };
+  getAll(): Array<ExceptionMetrics> {
+    return [...this.queue];
+  }
 }
+
+class ErrorTracking {
+  private static instance: ErrorTracking | null = null;
+  private engineInstance!: EngineConfig;
+  private submitErrorUids: Set<string> = new Set();
+  private eventHandlers: Map<string, Set<(event: ExceptionMetrics) => void>> = new Map();
+  private readonly ERROR_CATEGORY = 'error';
+  private reportQueue!: ErrorQueue;
+  private persistQueue!: ErrorQueue;
+  private initialized: boolean = false;
+
+  private constructor() {}
+
+  static getInstance(): ErrorTracking {
+    if (!ErrorTracking.instance) {
+      ErrorTracking.instance = new ErrorTracking();
+    }
+    return ErrorTracking.instance;
+  }
+
+  initialize(engineInstance: EngineInstance): void {
+    if (this.initialized) {
+      console.warn('ErrorTracking has already been initialized');
+      return;
+    }
+
+    this.engineInstance = engineInstance;
+
+    // 从配置中获取队列大小
+    const queueSize = engineInstance?.queueSize || 100;
+    const persistQueueSize = engineInstance?.persistQueueSize || 1000;
+
+    this.reportQueue = new ErrorQueue(queueSize);
+    this.persistQueue = new ErrorQueue(persistQueueSize);
+    this.initialized = true;
+    this.init();
+  }
+
+  private init(): void {
+    // 初始化各类错误监听
+    initJsError(this.errorSendHandler);
+    initResourceError(this.errorSendHandler);
+    initPromiseError(this.errorSendHandler);
+    initHttpError(this.errorSendHandler);
+
+    // 启动定时上报和持久化
+    if (this.engineInstance.batchReport) {
+      this.startBatchReporting();
+    }
+    this.startPersistenceTask();
+  }
+
+  private startBatchReporting(): void {
+    const config = this.engineInstance;
+    const batchSize = config?.batchSize || 5;
+    const batchTimeout = config?.batchTimeout || 3000;
+
+    setInterval(() => {
+      if (this.reportQueue.size() >= batchSize) {
+        this.sendBatchErrors();
+      }
+    }, batchTimeout);
+  }
+
+  private sendBatchErrors(): void {
+    const errors = this.reportQueue.getAll();
+    if (errors.length === 0) return;
+
+    this.reportQueue.clear();
+    this.engineInstance.transportInstance.kernelTransportHandler(
+      this.engineInstance.transportInstance.formatTransportData(this.ERROR_CATEGORY, {
+        type: 'batch_errors',
+        errors,
+        timestamp: Date.now(),
+      }),
+    );
+  }
+
+  private startPersistenceTask(): void {
+    // 定期将持久化队列中的错误存储到 IndexedDB
+    setInterval(() => {
+      const errors = this.persistQueue.getAll();
+      if (errors.length === 0) return;
+
+      this.persistQueue.clear();
+      this.persistErrorsToIndexedDB(errors);
+    }, 5000);
+  }
+
+  private async persistErrorsToIndexedDB(errors: ExceptionMetrics[]): Promise<void> {
+    try {
+      const db = await this.getIndexedDB();
+      const tx = db.transaction('errors', 'readwrite');
+      const store = tx.objectStore('errors');
+
+      for (const error of errors) {
+        store.add({
+          ...error,
+          persistTime: Date.now(),
+        });
+      }
+
+      await new Promise<void>((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    } catch (error) {
+      console.error('Error persisting to IndexedDB:', error);
+    }
+  }
+
+  private async getIndexedDB(): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('error-tracking', 1);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+
+      request.onupgradeneeded = event => {
+        const db = (event.target as IDBOpenDBRequest).result;
+        if (!db.objectStoreNames.contains('errors')) {
+          db.createObjectStore('errors', { keyPath: 'errorUid' });
+        }
+      };
+    });
+  }
+
+  // 错误上报处理
+  private errorSendHandler(error: Error | ExceptionMetrics): void {
+    try {
+      const errorEvent = error instanceof Error ? this.buildErrorEvent(error) : error;
+      if (this.engineInstance.errorFilter && !this.engineInstance.errorFilter(errorEvent)) {
+        return;
+      }
+      // 错误去重
+      if (this.submitErrorUids.has(errorEvent.errorUid)) {
+        return;
+      }
+      this.submitErrorUids.add(errorEvent.errorUid);
+
+      // 发送错误
+      this.emit('error', errorEvent);
+    } catch (e) {
+      console.error('Error handling failed:', e);
+    }
+  }
+
+  private buildErrorEvent(error: Error): ExceptionMetrics {
+    return {
+      type: errorEventTypes.JS_ERROR,
+      message: error.message,
+      stack: error.stack,
+      timestamp: Date.now(),
+      errorUid: generateUniqueId(),
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      mechanism: {
+        type: mechanismType.JS,
+        handled: true,
+      },
+      meta: {
+        name: error.name,
+      },
+    };
+  }
+
+  // 获取浏览器信息
+  private getBrowserInfo(): { name: string; version: string } {
+    const userAgent = navigator.userAgent;
+    let browserName = 'unknown';
+    let browserVersion = 'unknown';
+
+    if (userAgent.indexOf('Firefox') > -1) {
+      browserName = 'Firefox';
+      browserVersion = userAgent.match(/Firefox\/([0-9.]+)/)?.[1] || 'unknown';
+    } else if (userAgent.indexOf('Chrome') > -1) {
+      browserName = 'Chrome';
+      browserVersion = userAgent.match(/Chrome\/([0-9.]+)/)?.[1] || 'unknown';
+    } else if (userAgent.indexOf('Safari') > -1) {
+      browserName = 'Safari';
+      browserVersion = userAgent.match(/Version\/([0-9.]+)/)?.[1] || 'unknown';
+    }
+
+    return { name: browserName, version: browserVersion };
+  }
+
+  // 手动上报错误
+  public report(error: Error): void {
+    if (!this.isInitialized()) {
+      console.error('ErrorTracking must be initialized before reporting errors');
+      return;
+    }
+
+    try {
+      const errorEvent: ExceptionMetrics = this.buildErrorEvent(error);
+      this.errorSendHandler(errorEvent);
+    } catch (e) {
+      console.error('Failed to report error:', e);
+    }
+  }
+
+  // 确定错误严重程度
+  private determineSeverity(error: Error): 'low' | 'medium' | 'high' | 'critical' {
+    if (error.name === 'TypeError' || error.name === 'ReferenceError') {
+      return 'high';
+    } else if (error.name === 'SyntaxError') {
+      return 'critical';
+    }
+    return 'medium';
+  }
+
+  // 分类错误
+  private categorizeError(error: Error): string {
+    switch (error.name) {
+      case 'TypeError':
+      case 'ReferenceError':
+        return 'runtime';
+      case 'SyntaxError':
+        return 'syntax';
+      case 'NetworkError':
+      case 'AbortError':
+        return 'network';
+      case 'SecurityError':
+        return 'security';
+      default:
+        return 'other';
+    }
+  }
+
+  // 触发事件
+  private emit(eventName: string, data: ExceptionMetrics): void {
+    if (!this.isInitialized()) {
+      console.error('ErrorTracking must be initialized before emitting events');
+      return;
+    }
+
+    const handlers = this.eventHandlers.get(eventName);
+    if (handlers) {
+      handlers.forEach(handler => {
+        try {
+          handler(data);
+        } catch (error) {
+          console.error(`Error in ${eventName} event handler:`, error);
+        }
+      });
+    }
+  }
+
+  // 注册事件监听器
+  public on(eventName: string, callback: (event: ExceptionMetrics) => void): void {
+    if (!this.eventHandlers.has(eventName)) {
+      this.eventHandlers.set(eventName, new Set());
+    }
+    this.eventHandlers.get(eventName)?.add(callback);
+  }
+
+  // 检查是否已初始化
+  public isInitialized(): boolean {
+    return this.initialized;
+  }
+
+  public setCrumb(crumb: { key: string; value: Breadcrumb }): void {
+    this.engineInstance.userInstance.breadcrumbs.set(crumb.key, crumb.value);
+  }
+
+  public removeCrumb(key: string): void {
+    this.engineInstance.userInstance.breadcrumbs.remove(key);
+  }
+
+  private addBreadcrumb(_crumb: Breadcrumb): void {
+    // 实现面包屑添加逻辑
+  }
+}
+
+// 导出 errorTracking 实例
+export const errorTracking = {
+  init(config: ErrorTrackingConfig): ErrorTracking {
+    const engineInstance: EngineInstance = {
+      transportCategory: 'error',
+      userInstance: {
+        breadcrumbs: {
+          get: () => [],
+          clear: () => {},
+          add: (_crumb: Breadcrumb) => {},
+          set: (_key: string, _value: Breadcrumb) => {},
+          remove: (_key: string) => {},
+        },
+        metrics: {
+          get: (_key: string) => ({}),
+          set: (_key: string, _value: unknown) => {},
+        },
+      },
+      transportInstance: {
+        kernelTransportHandler: (data: unknown) => {
+          console.log('Error data:', data);
+        },
+        formatTransportData: (_category: string, data: unknown) => data,
+      },
+      ...config,
+    };
+
+    const instance = ErrorTracking.getInstance();
+    instance.initialize(engineInstance);
+    return instance;
+  },
+
+  report(error: Error): void {
+    const instance = ErrorTracking.getInstance();
+    if (!instance.isInitialized()) {
+      console.error('ErrorTracking must be initialized before reporting errors');
+      return;
+    }
+    instance.report(error);
+  },
+
+  on(eventName: string, callback: (event: ExceptionMetrics) => void): void {
+    const instance = ErrorTracking.getInstance();
+    if (!instance.isInitialized()) {
+      console.error('ErrorTracking must be initialized before adding event listeners');
+      return;
+    }
+    instance.on(eventName, callback);
+  },
+
+  userInstance: {
+    breadcrumbs: {
+      get: () => [],
+      clear: () => {},
+      add: (_crumb: Breadcrumb) => {},
+      set: (_key: string, _value: Breadcrumb) => {},
+      remove: (_key: string) => {},
+    },
+    metrics: {
+      get: (_key: string) => ({}),
+      set: (_key: string, _value: unknown) => {},
+    },
+  },
+};
+
+type ErrorHandler = (error: unknown) => void;
+
+export const addBreadcrumb = (_message: string, _data?: Record<string, unknown>): void => {
+  // 实现逻辑
+};
+
+export const setContext = (_key: string, _value: unknown): void => {
+  // 实现逻辑
+};
+
+export const setUser = (_user: { id?: string; username?: string; email?: string }): void => {
+  // 实现逻辑
+};
+
+export const captureException = (_error: unknown): void => {
+  // 实现逻辑
+};
+
+export const captureMessage = (_message: string): void => {
+  // 实现逻辑
+};
+
+export const addGlobalErrorHandler = (_handler: ErrorHandler): void => {
+  // 实现逻辑
+};
