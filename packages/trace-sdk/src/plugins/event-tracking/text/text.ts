@@ -1,4 +1,4 @@
-import { EventTracking } from './index';
+import { EventTracking } from '..';
 
 const text = new EventTracking();
 console.log(text);

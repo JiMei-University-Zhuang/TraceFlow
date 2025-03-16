@@ -1,5 +1,5 @@
 import { onCLS, onFCP, onLCP, onTTFB } from 'web-vitals';
-import { Callback } from '../types';
+import { Callback } from '../types/type';
 
 async function getWebVitals(callback: Callback): Promise<void> {
   const [CLS, FCP, LCP, TTFB, FP] = await Promise.all([

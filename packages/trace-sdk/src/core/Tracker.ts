@@ -2,11 +2,11 @@ import { TrackerConfig, TrackEvent, ReportStrategy } from './types';
 
 export class Tracker {
   private config: TrackerConfig;
-  private immediateQueue: TrackEvent[] = [];
-  private batchQueue: TrackEvent[] = [];
+  private immediateQueue: TrackEvent[] = [];//立即上报队列
+  private batchQueue: TrackEvent[] = [];//批量上报队列
   private readonly BATCH_LIMIT = 20; //上报限制
   private readonly BATCH_INTERVAL = 5000; //每五秒批量上报
-  private isUnloading = false;
+  private isUnloading = false;//页面是否卸载
 
   // 新增防抖定时器变量
   private clickTimer: number | null = null;
@@ -108,16 +108,19 @@ export class Tracker {
     }
   }
 
+  //判断是否为关键事件
   private isCriticalEvent(event: TrackEvent): boolean {
+    // 关键事件类型  错误事件、购买事件、结账事件、页面浏览事件PV
     return ['error', 'purchase', 'checkout', 'behavior_pv'].includes(event.eventType);
   }
 
+  //立即上报并且清空立即上报队列
   private flushImmediateQueue() {
     if (this.immediateQueue.length === 0) return;
     const events = this.immediateQueue.splice(0);
     this.sendBatch(events, this.selectStrategy(events, true));
   }
-
+  //批量上报并且清空批量上报队列
   private flushBatchQueue() {
     if (this.batchQueue.length === 0) return;
     const events = this.batchQueue.splice(0, this.BATCH_LIMIT);
@@ -203,6 +206,7 @@ export class Tracker {
     });
   }
 
+  //创建一个基础的事件对象
   private createBaseEvent(eventType: string, eventData?: Record<string, any>): TrackEvent {
     return {
       eventType,

@@ -12,7 +12,10 @@
     <button id="replaceStateButton">Replace State</button>
     <button id="changeHashButton">Change Hash</button>
     <button id="goBackButton">Go Back</button>
-    <script type="module" src="../../../dist/bundle.js"></script>
+    <button class="sb">点击我</button>
+    <button id="testBtn">发起请求</button>
+    <button id="simulateBeforeUnload">模拟关闭页面</button>
+    <script type="module" src="../../../../dist/bundle.js"></script>
     <script>
       document.getElementById('pushStateButton').addEventListener('click', () => {
         history.pushState(null, '', '/new-page');
@@ -33,6 +36,18 @@
         window.history.back();
         console.log('GoBack 被调用');
       });
+      document.getElementById('testBtn').addEventListener('click', function(){
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', 'https://jsonplaceholder.typicode.com/todos/1', true);
+      xhr.onload = function() {
+        console.log('收到响应：', xhr.responseText);
+      };
+      xhr.send();
+    });
+    document.getElementById('simulateBeforeUnload').addEventListener('click', () => {
+      console.log('模拟关闭页面');
+      window.dispatchEvent(new Event('beforeunload'));
+    });
     </script>
   </body>
 </html>
