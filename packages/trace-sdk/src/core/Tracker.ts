@@ -2,11 +2,11 @@ import { TrackerConfig, TrackEvent, ReportStrategy } from './types';
 
 export class Tracker {
   private config: TrackerConfig;
-  private immediateQueue: TrackEvent[] = [];//立即上报队列
-  private batchQueue: TrackEvent[] = [];//批量上报队列
+  private immediateQueue: TrackEvent[] = []; //立即上报队列
+  private batchQueue: TrackEvent[] = []; //批量上报队列
   private readonly BATCH_LIMIT = 20; //上报限制
   private readonly BATCH_INTERVAL = 5000; //每五秒批量上报
-  private isUnloading = false;//页面是否卸载
+  private isUnloading = false; //页面是否卸载
 
   // 新增防抖定时器变量
   private clickTimer: number | null = null;
@@ -70,6 +70,17 @@ export class Tracker {
 
     // 复用现有队列逻辑
     this.enqueueEvent(event, immediate);
+  }
+
+  // ==================== 错误上报方法 ====================
+  public reportError(error: Error | string, extra?: Record<string, any>) {
+    const errorData = {
+      message: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : '',
+      ...extra,
+    };
+
+    this.trackEvent('error', errorData, true); // 强制立即上报
   }
 
   //手动上报
