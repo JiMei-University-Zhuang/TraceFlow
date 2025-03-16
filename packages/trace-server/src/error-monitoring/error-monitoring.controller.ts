@@ -44,10 +44,15 @@ export class ErrorMonitoringController {
     @Query('startTime') startTime?: string,
     @Query('endTime') endTime?: string,
   ) {
+    const startTimestamp = startTime
+      ? new Date(startTime).getTime()
+      : undefined;
+    const endTimestamp = endTime ? new Date(endTime).getTime() : undefined;
+
     const stats = await this.errorMonitoringService.getErrorStats(
       appId,
-      startTime,
-      endTime,
+      startTimestamp,
+      endTimestamp,
     );
     return {
       success: true,
@@ -64,7 +69,7 @@ export class ErrorMonitoringController {
       pageSize: 1,
     });
 
-    if (result.data.length === 0) {
+    if (result.items.length === 0) {
       return {
         success: false,
         message: '未找到指定的错误记录',
@@ -73,7 +78,7 @@ export class ErrorMonitoringController {
 
     return {
       success: true,
-      data: result.data[0],
+      data: result.items[0],
       message: '错误详情获取成功',
     };
   }
@@ -84,27 +89,23 @@ export class ErrorMonitoringController {
     @Query('period') period: '24h' | '7d' | '30d' = '24h',
   ) {
     const now = new Date();
-    let startTime: string;
+    let startTime: Date;
 
     switch (period) {
       case '7d':
-        startTime = new Date(
-          now.getTime() - 7 * 24 * 60 * 60 * 1000,
-        ).toISOString();
+        startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         break;
       case '30d':
-        startTime = new Date(
-          now.getTime() - 30 * 24 * 60 * 60 * 1000,
-        ).toISOString();
+        startTime = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
         break;
       default: // 24h
-        startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+        startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     }
 
     const stats = await this.errorMonitoringService.getErrorStats(
       appId,
-      startTime,
-      now.toISOString(),
+      startTime.getTime(),
+      now.getTime(),
     );
 
     return {
@@ -112,7 +113,7 @@ export class ErrorMonitoringController {
       data: {
         ...stats,
         period,
-        startTime,
+        startTime: startTime.toISOString(),
         endTime: now.toISOString(),
       },
       message: '应用错误概览获取成功',

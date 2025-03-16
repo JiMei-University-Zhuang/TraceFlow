@@ -3,7 +3,7 @@
 ## 环境要求
 
 - Node.js >= 16
-- PostgreSQL >= 12
+- MongoDB >= 4.4
 - Redis (可选)
 - PM2 (用于进程管理)
 
@@ -21,16 +21,34 @@ sudo apt-get install -y nodejs
 # 安装 PM2
 npm install -g pm2
 
-# 安装 PostgreSQL（如果未安装）
-sudo apt-get install postgresql postgresql-contrib
+# 安装 MongoDB（如果未安装）
+wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+sudo apt-get update
+sudo apt-get install -y mongodb-org
+sudo systemctl start mongod
+sudo systemctl enable mongod
 ```
 
-2. 创建数据库：
+2. 创建数据库和用户：
 
-```sql
-CREATE DATABASE traceflow;
-CREATE USER your_db_user WITH ENCRYPTED PASSWORD 'your_db_password';
-GRANT ALL PRIVILEGES ON DATABASE traceflow TO your_db_user;
+```javascript
+// 连接到 MongoDB
+mongo
+
+// 创建数据库和用户
+use traceflow
+db.createUser({
+  user: "your_mongo_user",
+  pwd: "your_mongo_password",
+  roles: [{ role: "readWrite", db: "traceflow" }]
+})
+
+// 创建必要的集合和索引
+db.createCollection("error_reports")
+db.error_reports.createIndex({ "timestamp": -1 })
+db.error_reports.createIndex({ "appId": 1 })
+db.error_reports.createIndex({ "errorUid": 1 }, { unique: true })
 ```
 
 ### 2. 部署文件
@@ -59,7 +77,7 @@ npm ci --production
 
 1. 修改 `config/production.env` 文件，设置正确的：
 
-   - 数据库连接信息
+   - MongoDB 连接信息
    - JWT 密钥
    - Redis 配置（如果使用）
    - 日志路径
@@ -167,7 +185,14 @@ tail -f /var/log/syslog
 3. 检查数据库连接：
 
 ```bash
-psql -h localhost -U your_db_user -d traceflow
+# 连接到 MongoDB
+mongo mongodb://localhost:27017/traceflow -u your_mongo_user -p your_mongo_password
+
+# 检查数据库状态
+db.serverStatus()
+
+# 检查集合
+show collections
 ```
 
 4. 检查端口占用：

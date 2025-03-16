@@ -172,7 +172,7 @@ export class ErrorMonitoringService {
           count: { $sum: 1 },
         },
       },
-      { $sort: { count: -1 } },
+      { $sort: { count: -1 } as any },
       { $limit: 10 },
       {
         $project: {
@@ -183,7 +183,9 @@ export class ErrorMonitoringService {
         },
       },
     ];
-    const topErrors = await this.errorReportModel.aggregate(topErrorsPipeline);
+    const topErrors = await this.errorReportModel.aggregate(
+      topErrorsPipeline as any,
+    );
 
     return {
       totalErrors,
@@ -218,11 +220,11 @@ export class ErrorMonitoringService {
           count: { $sum: 1 },
         },
       },
-      { $sort: { _id: 1 } },
+      { $sort: { _id: 1 } as any },
       { $project: { _id: 0, timestamp: '$_id', count: 1 } },
     ];
 
-    return this.errorReportModel.aggregate(pipeline);
+    return this.errorReportModel.aggregate(pipeline as any);
   }
 
   async getErrorDetail(errorUid: string): Promise<ErrorReport> {
@@ -290,7 +292,7 @@ export class ErrorMonitoringService {
           lastSeen: { $max: '$timestamp' },
         },
       },
-      { $sort: { count: -1 } },
+      { $sort: { count: -1 } as any },
       { $limit: 5 },
       {
         $project: {
@@ -302,7 +304,9 @@ export class ErrorMonitoringService {
         },
       },
     ];
-    const topIssues = await this.errorReportModel.aggregate(topIssuesPipeline);
+    const topIssues = await this.errorReportModel.aggregate(
+      topIssuesPipeline as any,
+    );
 
     return {
       totalErrors,
