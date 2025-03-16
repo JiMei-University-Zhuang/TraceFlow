@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Config, CustomRequestConfig } from '../types/type';
+import { performanceTracker } from '../index';
 
 const getRequestMonitor = (config?: Config) => {
   const instance = axios.create(config);
@@ -24,7 +25,7 @@ const getRequestMonitor = (config?: Config) => {
             status: response.status,
             duration: performance.now() - metaData.startTime,
           };
-          console.log({ requestMonitor: sdkData }); //后续替换为上报
+          performanceTracker.onPerformanceData({ requestMonitor: sdkData });
         }
         return response;
       },
@@ -39,7 +40,7 @@ const getRequestMonitor = (config?: Config) => {
             duration: performance.now() - metaData.startTime,
             error: error.message,
           };
-          console.log({ requestMonitor: errorData }); //后续替换为上报
+          performanceTracker.onPerformanceData({ requestMonitor: errorData });
         }
         return Promise.reject(error);
       },

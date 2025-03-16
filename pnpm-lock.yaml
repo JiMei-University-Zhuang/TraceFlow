@@ -195,6 +195,9 @@ importers:
       puppeteer:
         specifier: ^24.3.1
         version: 24.4.0(typescript@5.8.2)
+      react:
+        specifier: ^19.0.0
+        version: 19.0.0
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
@@ -211,6 +214,12 @@ importers:
       '@rollup/plugin-terser':
         specifier: ^0.4.4
         version: 0.4.4(rollup@4.34.9)
+      '@types/react':
+        specifier: ^19.0.10
+        version: 19.0.10
+      '@types/react-dom':
+        specifier: ^19.0.4
+        version: 19.0.4(@types/react@19.0.10)
       rollup:
         specifier: ^4.34.9
         version: 4.34.9

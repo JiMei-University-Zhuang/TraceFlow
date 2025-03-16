@@ -42,7 +42,7 @@ class TraceSDK {
     EventTracking.init();
 
     // 初始化性能监控
-    performanceTracking.init(console.log);
+    performanceTracking.init();
   }
 
   // 手动上报错误

@@ -2,11 +2,11 @@ import { TrackerConfig, TrackEvent, ReportStrategy } from './types';
 
 export class Tracker {
   private config: TrackerConfig;
-  private immediateQueue: TrackEvent[] = [];//立即上报队列
-  private batchQueue: TrackEvent[] = [];//批量上报队列
+  private immediateQueue: TrackEvent[] = []; //立即上报队列
+  private batchQueue: TrackEvent[] = []; //批量上报队列
   private readonly BATCH_LIMIT = 20; //上报限制
   private readonly BATCH_INTERVAL = 5000; //每五秒批量上报
-  private isUnloading = false;//页面是否卸载
+  private isUnloading = false; //页面是否卸载
 
   // 新增防抖定时器变量
   private clickTimer: number | null = null;
@@ -56,8 +56,8 @@ export class Tracker {
   };
 
   //自动上报性能监控的逻辑
-  public onPerformanceData = (data: Record<string, number>) => {
-    this.trackEvent('performance', data, data.lcp > 2500);
+  public onPerformanceData = (data: Record<string, any>) => {
+    this.trackEvent('performance', data, data?.lcp > 2500);
   };
 
   //行为上报
