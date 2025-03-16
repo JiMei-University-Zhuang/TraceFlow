@@ -9,7 +9,7 @@
     "build": "webpack --mode production",
     "type-check": "tsc --noEmit",
     "test": "test",
-    "server": "json-server --watch db.json --port 8081"
+    "server": "json-server --watch ./src/data/db.json --port 8081"
   },
   "keywords": [],
   "author": "",

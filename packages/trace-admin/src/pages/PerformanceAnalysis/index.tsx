@@ -3,9 +3,10 @@ import { Row, Col, Card } from 'antd';
 import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 import { usePerformanceData } from '../../hooks/usePerformanceData';
+import { LongTask } from '@/types';
 
 const PerformanceDashboard = () => {
-  const { metrics, requests, resources } = usePerformanceData();
+  const { metrics, requests, resources, LongTask } = usePerformanceData();
 
   // 核心性能指标图表
   const coreMetricsOption: EChartsOption = {
@@ -149,24 +150,85 @@ const PerformanceDashboard = () => {
     ],
   };
 
+  // 长任务
+  const longTaskOption: EChartsOption = {
+    title: { text: '长任务监控（>50ms）', left: 'center' },
+    tooltip: {
+      trigger: 'axis',
+      formatter: (params: any) => {
+        const task = params[0].data as LongTask;
+        return `
+          开始时间：${new Date(task.startTime).toLocaleTimeString()}<br/>
+          持续时间：${task.duration}ms<br/>
+          任务类型：${task.name || '未知'}
+        `;
+      },
+    },
+    xAxis: {
+      type: 'time',
+      axisLabel: {
+        formatter: (value: number) => new Date(value).toLocaleTimeString(),
+      },
+    },
+    yAxis: {
+      name: '持续时间(ms)',
+      type: 'value',
+      axisLabel: {
+        formatter: (value: number) => `${value}ms`,
+      },
+    },
+    series: [
+      {
+        name: '长任务',
+        type: 'scatter',
+        symbolSize: data => Math.min(data[1] / 5, 30), // 根据持续时间调整大小
+        data: LongTask.map(task => ({
+          value: [task.startTime, task.duration],
+          name: task.name,
+        })),
+        itemStyle: {
+          color: params => {
+            const duration = (params.data as any).value[1];
+            return duration > 200 ? '#ff4d4f' : duration > 100 ? '#faad14' : '#52c41a';
+          },
+        },
+      },
+    ],
+    dataZoom: [
+      {
+        type: 'slider',
+        show: true,
+        start: 0,
+        end: 100,
+        xAxisIndex: 0,
+      },
+    ],
+  };
+
   return (
     <div style={{ padding: 24 }}>
       <Row gutter={[16, 16]}>
-        <Col span={24}>
+        <Col span={12}>
           <Card title="核心性能指标">
-            <ReactECharts option={coreMetricsOption} style={{ height: 300 }} opts={{ renderer: 'svg' }} />
+            <ReactECharts option={coreMetricsOption} style={{ height: 250 }} opts={{ renderer: 'svg' }} />
           </Card>
         </Col>
 
         <Col span={12}>
           <Card title="接口请求分析">
-            <ReactECharts option={requestAnalysisOption} style={{ height: 200 }} />
+            <ReactECharts option={requestAnalysisOption} style={{ height: 250 }} />
           </Card>
         </Col>
 
         <Col span={12}>
           <Card title="资源类型分布">
-            <ReactECharts option={resourceAnalysisOption} style={{ height: 200 }} />
+            <ReactECharts option={resourceAnalysisOption} style={{ height: 250 }} />
+          </Card>
+        </Col>
+
+        <Col span={12}>
+          <Card title="长任务监控">
+            <ReactECharts option={longTaskOption} style={{ height: 250 }} opts={{ renderer: 'svg' }} />
           </Card>
         </Col>
       </Row>

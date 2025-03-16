@@ -26,5 +26,12 @@
       "duration": 150,
       "size": 10240
     }
+  ],
+  "LongTask": [
+    {
+      "startTime": 1720320000123,
+      "duration": 150,
+      "name": "script-execution"
+    }
   ]
 }

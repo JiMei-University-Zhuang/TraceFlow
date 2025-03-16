@@ -27,3 +27,10 @@ export interface ResourceLoad {
   duration: number;
   size: number;
 }
+
+// 长任务
+export interface LongTask {
+  startTime: number; // 使用PerformanceEntry的startTime
+  duration: number; // 持续时间（毫秒）
+  name: string; // 使用entry.name作为任务类型标识
+}
