@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ErrorMonitoringController } from './error-monitoring.controller';
 import { ErrorMonitoringService } from './error-monitoring.service';
-import { ErrorReport } from './entities/error-report.entity';
+import { ErrorReport, ErrorReportSchema } from './entities/error-report.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ErrorReport])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: ErrorReport.name, schema: ErrorReportSchema },
+    ]),
+  ],
   controllers: [ErrorMonitoringController],
   providers: [ErrorMonitoringService],
   exports: [ErrorMonitoringService],

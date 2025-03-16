@@ -1,55 +1,50 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { ErrorSeverity, ErrorCategory } from '../dto/error-report.dto';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
+import { ErrorSeverity, ErrorCategory } from '../enums';
 
-@Entity('error_reports')
-export class ErrorReport {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column()
-  type: string;
-
-  @Column()
-  message: string;
-
-  @Column({ nullable: true })
-  stack?: string;
-
-  @Column({ type: 'bigint' })
-  timestamp: number;
-
-  @Column()
+@Schema({ timestamps: true })
+export class ErrorReport extends Document {
+  @Prop({ required: true })
   errorUid: string;
 
-  @Column()
+  @Prop({ required: true })
+  type: string;
+
+  @Prop({ required: true })
+  message: string;
+
+  @Prop()
+  stack?: string;
+
+  @Prop({ required: true })
+  timestamp: number;
+
+  @Prop({ required: true })
   url: string;
 
-  @Column()
-  userAgent: string;
+  @Prop()
+  userAgent?: string;
 
-  @Column()
-  platform: string;
+  @Prop()
+  platform?: string;
 
-  @Column('jsonb')
+  @Prop({ required: true })
+  appId: string;
+
+  @Prop({ type: String, enum: ErrorSeverity, default: ErrorSeverity.MEDIUM })
+  severity: ErrorSeverity;
+
+  @Prop({ type: String, enum: ErrorCategory, default: ErrorCategory.CUSTOM })
+  category: ErrorCategory;
+
+  @Prop({ type: Object })
   context: {
-    severity: ErrorSeverity;
-    category: ErrorCategory;
-    environment: string;
-    release?: string;
+    environment?: string;
     tags?: Record<string, string>;
-    metadata?: Record<string, unknown>;
-    userId?: string;
-    sessionId: string;
     deviceInfo?: {
-      os: string;
-      browser: string;
-      device: string;
+      os?: string;
+      browser?: string;
+      device?: string;
       screenResolution?: string;
     };
     networkInfo?: {
@@ -57,36 +52,33 @@ export class ErrorReport {
       downlink?: number;
       rtt?: number;
     };
+    sessionId?: string;
+    userId?: string;
   };
 
-  @Column('jsonb')
-  mechanism: {
+  @Prop({ type: Object })
+  mechanism?: {
     type: string;
-    handled?: boolean;
-    data?: Record<string, unknown>;
+    handled: boolean;
+    data?: Record<string, any>;
   };
 
-  @Column('jsonb', { nullable: true })
+  @Prop({ type: Object })
   sampling?: {
     rate: number;
     isSelected: boolean;
   };
 
-  @Column('jsonb', { nullable: true })
-  breadcrumbs?: Array<{
-    message: string;
-    data?: Record<string, unknown>;
-  }>;
-
-  @Column('jsonb')
-  meta: Record<string, unknown>;
-
-  @Column()
-  appId: string;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @Prop({ type: Object })
+  meta?: Record<string, any>;
 }
+
+export const ErrorReportSchema = SchemaFactory.createForClass(ErrorReport);
+
+// 创建索引
+ErrorReportSchema.index({ timestamp: -1 });
+ErrorReportSchema.index({ appId: 1 });
+ErrorReportSchema.index({ errorUid: 1 }, { unique: true });
+ErrorReportSchema.index({ 'context.userId': 1 });
+ErrorReportSchema.index({ severity: 1 });
+ErrorReportSchema.index({ category: 1 });
