@@ -7,12 +7,15 @@ import json from '@rollup/plugin-json'; // 解析JSON文件
 import nodePolyfills from 'rollup-plugin-polyfill-node';
 
 export default {
-  input: 'src/plugins/event-tracking/text/text.ts', // 输入文件，通常是项目的主入口文件
+  input: 'src/index.ts', // 输入文件，通常是项目的主入口文件
   output: {
     file: 'dist/bundle.js', // 输出文件路径
     format: 'umd', // UMD格式，适用于浏览器和Node.js
-    name: 'MyLibrary', // 全局变量名
+    name: 'TraceSDK', // 全局变量名
     sourcemap: true, // 启用sourcemap，方便调试
+    globals: {
+      axios: 'axios', // 声明外部依赖的全局变量名
+    },
   },
   plugins: [
     json(), // 解析JSON文件
@@ -26,5 +29,5 @@ export default {
     typescript({ tsconfig: './tsconfig.json' }), // 使用TypeScript插件并指定tsconfig.json
     terser(), // 压缩代码
   ],
-  external: ['fs', 'path', 'http', 'crypto', 'stream', 'os'], // 排除这些模块，避免打包它们
+  external: ['fs', 'path', 'http', 'crypto', 'stream', 'os', 'axios'], // 排除这些模块，避免打包它们
 };

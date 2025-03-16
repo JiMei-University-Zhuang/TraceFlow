@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Config, CustomRequestConfig } from '../types/type';
 
-const getRequestMonitor = (config: Config) => {
+const getRequestMonitor = (config?: Config) => {
   const instance = axios.create(config);
 
   // 初始化拦截器
@@ -49,4 +49,4 @@ const getRequestMonitor = (config: Config) => {
   return instance;
 };
 
-export const initMonitorAxios = (config: Config) => getRequestMonitor(config);
+export const initMonitorAxios = (config?: Config) => getRequestMonitor(config);
