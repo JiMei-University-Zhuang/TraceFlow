@@ -1,6 +1,6 @@
 import { IMetrics, UserMetricsStore } from './core/base';
 import { behaviorStack, httpMetrics, metricsName, OriginInformation } from './types/types';
-import { getExtends, getPageInfo } from './core/getpage';
+import { getExtends, getPageInfo } from '../../utils/index';
 import { getOriginInfo, proxyHash, proxyHistory, wrHistory } from './core/eventTracker';
 import { timeStamp } from 'console';
 import behaviorStore from './core/behaviorStore';
@@ -10,6 +10,15 @@ import { recordNextPage, routeList, routeTemplate } from './core/monitor';
 const PI = metricsName.PI;
 const RCR = metricsName.RCR;
 export class EventTracking {
+  private static instance: EventTracking | null = null;
+
+  public static init(): EventTracking {
+    if (!EventTracking.instance) {
+      EventTracking.instance = new EventTracking();
+    }
+    return EventTracking.instance;
+  }
+
   //本地暂存数据Map
   private metrics: UserMetricsStore;
   public breadcrumbs: behaviorStore;

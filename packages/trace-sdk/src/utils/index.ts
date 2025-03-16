@@ -1,5 +1,5 @@
 //获取页面信息
-import { PageInformation } from '../types/types';
+import { PageInformation } from '../plugins/event-tracking/types/types';
 
 export const utils = {
   version: '1.0.0',
@@ -28,3 +28,7 @@ export const getExtends = (): { page: string; timestamp: number | string } => {
     timestamp: new Date().getTime(),
   };
 };
+
+export function generateUniqueId(): string {
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
