@@ -50,6 +50,7 @@ export class EventTracking {
     this.initClickHandler(this.clickMountList);
     this.initHttpHandler();
     this.inidUsertime();
+    this.getAll()
   }
   //获取页面信息
   initPageInfo = (): void => {
@@ -74,6 +75,7 @@ export class EventTracking {
         //用户来源
         originInformation: getOriginInfo(),
       };
+      this.metrics.set(metricsName.PI, metrics);
       //数据上报
       console.log('meteics:', metrics);
     };
@@ -91,6 +93,7 @@ export class EventTracking {
         pageInfo: getPageInfo(),
       } as IMetrics;
       this.metrics.set(metricsName.RCR, metrics);
+      // console.log('用户输入的数据', this.metrics);
 
       const behavior = {
         category: RCR,
@@ -193,4 +196,8 @@ export class EventTracking {
     })
     console.log('routeList',routeList,'routeTemplate',routeTemplate,)
   }
+  // 输出所有用户存储的数据
+  getAll = (): any => {
+    console.log('用户行为数据',this.metrics);
+  };
 }

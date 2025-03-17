@@ -15,8 +15,10 @@
     <button class="sb">点击我</button>
     <button id="testBtn">发起请求</button>
     <button id="simulateBeforeUnload">模拟关闭页面</button>
+    <!-- 新增按钮，用于调用 getAll 方法 -->
+    <button id="getAllDataButton">输出所有数据</button>
     <script type="module" src="../../../../dist/bundle.js"></script>
-    <script>
+    <script type="module">
       document.getElementById('pushStateButton').addEventListener('click', () => {
         history.pushState(null, '', '/new-page');
         console.log('PushState 被调用');
