@@ -2,47 +2,13 @@ import { behaviorStack } from '../../../core/types';
 
 export * from './error';
 
-// 用户实例接口
-export interface UserInstance {
-  breadcrumbs: {
-    get: () => Breadcrumb[];
-    clear: () => void;
-    add: (_crumb: Breadcrumb) => void;
-    set: (_key: string, _value: Breadcrumb) => void;
-    remove: (_key: string) => void;
-  };
-  metrics: {
-    get: (_key: string) => unknown;
-    set: (_key: string, _value: unknown) => void;
-  };
-}
-
-// 传输实例接口
-export interface TransportInstance {
-  kernelTransportHandler: (data: unknown) => void;
-  formatTransportData: (category: string, data: unknown) => unknown;
-}
-
-// 错误监控引擎实例配置
-export interface EngineConfig {
-  // 基础配置
-  transportCategory: string; // 传输类别，用于区分不同类型的数据
-  userInstance: UserInstance; // 用户实例，用于管理用户行为和页面信息
-  transportInstance: TransportInstance; // 传输实例，用于处理数据上报
-  reportUrl?: string; // 错误上报的目标 URL
-
-  // 错误队列配置
-  queueSize?: number; // 待上报队列的大小限制
-  persistQueueSize?: number; // 持久化队列的大小限制
-  queueOverflowAction?: 'drop-oldest' | 'drop-newest'; // 队列溢出时的处理策略
-
-  // 批量上报配置
-  batchReport?: boolean; // 是否启用批量上报
-  batchSize?: number; // 批量上报的数量阈值
-  batchTimeout?: number; // 批量上报的超时时间（毫秒）
-
-  // 错误过滤
-  errorFilter?: (error: unknown) => boolean; // 错误过滤函数，返回 true 表示需要上报
+// 错误事件类型枚举
+export enum ErrorEventType {
+  HTTP_ERROR = 'http_error',
+  JS_ERROR = 'js_error',
+  RESOURCE_ERROR = 'resource_error',
+  PROMISE_ERROR = 'promise_error',
+  CUSTOM_ERROR = 'custom_error',
 }
 
 // HTTP请求指标
@@ -60,7 +26,7 @@ export interface ErrorMetrics {
 
 export interface HttpMetrics {
   method: string;
-  url: string;
+  url: string | URL;
   body?: unknown;
   status?: number;
   statusText?: string;
@@ -68,6 +34,12 @@ export interface HttpMetrics {
   requestTime: number;
   responseTime?: number;
   data?: Record<string, unknown>;
+}
+
+export interface ResourceErrorTarget {
+  src?: string;
+  tagName?: string;
+  outerHTML?: string;
 }
 
 export interface EventHandler {
@@ -99,7 +71,7 @@ export const errorEventTypes = {
   UNKNOWN: 'unknown',
 } as const;
 
-export type ErrorEventType = (typeof errorEventTypes)[keyof typeof errorEventTypes];
+export type ErrorEventType2 = (typeof errorEventTypes)[keyof typeof errorEventTypes];
 
 // 错误事件数据结构
 export interface ExceptionMetrics {
@@ -121,7 +93,7 @@ export interface ExceptionMetrics {
 
   // 错误机制
   mechanism: {
-    type: MechanismType;
+    type: string;
     handled?: boolean;
     data?: Record<string, unknown>;
   };
@@ -142,7 +114,10 @@ export interface ExceptionMetrics {
   pageInformation?: unknown;
 
   // 扩展信息
-  meta: Record<string, unknown>;
+  meta?: Record<string, unknown>;
+
+  // 堆栈信息
+  stackTrace?: { frames: any[] };
 }
 
 // 错误上报数据结构
@@ -248,5 +223,8 @@ export interface ErrorContext {
     effectiveType?: string;
     downlink?: number;
     rtt?: number;
+    url?: string;
+    method?: string;
+    status?: number;
   };
 }
