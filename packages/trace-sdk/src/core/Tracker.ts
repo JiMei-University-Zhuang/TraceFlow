@@ -72,6 +72,17 @@ export class Tracker {
     this.enqueueEvent(event, immediate);
   }
 
+  // ==================== 错误上报方法 ====================
+  public reportError(error: Error | string, extra?: Record<string, any>) {
+    const errorData = {
+      message: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : '',
+      ...extra,
+    };
+
+    this.trackEvent('error', errorData, true); // 强制立即上报
+  }
+
   //手动上报
   public trackEvent = (eventType: string, eventData?: Record<string, any>, isImmediate = false) => {
     const event = this.createBaseEvent(eventType, eventData);

@@ -1,8 +1,7 @@
 import { IMetrics, UserMetricsStore } from './core/base';
-import { behaviorStack, httpMetrics, metricsName, OriginInformation } from './types/types';
+import { metricsName, OriginInformation } from './types/types';
 import { getExtends, getPageInfo } from '../../utils/index';
 import { getOriginInfo, proxyHash, proxyHistory, wrHistory } from './core/eventTracker';
-import { timeStamp } from 'console';
 import behaviorStore from './core/behaviorStore';
 import { proxyFetch, proxyXmlHttp } from './core/httpInterceptor';
 import { recordNextPage, routeList, routeTemplate } from './core/monitor';
@@ -30,7 +29,7 @@ export class EventTracking {
     this.metrics = new UserMetricsStore();
     //限制最大行为追踪记录数
     this.maxBehaviorRecords = 100;
-       // 首次进入页面初始化记录
+    // 首次进入页面初始化记录
     //    const time = new Date().getTime();
     //    routeList.push({
     //        ...routeTemplate,
@@ -158,39 +157,39 @@ export class EventTracking {
     proxyFetch(null, loadHandler);
   };
   //记录用户的页面留存时间
-  inidUsertime = ():void => {
+  inidUsertime = (): void => {
     // 第一次进入页面记录
-    window.addEventListener('load',() => {
+    window.addEventListener('load', () => {
       const time = new Date().getTime();
       routeList.push({
         ...routeTemplate,
-         startTime:time,
-         url:window.location.pathname,
-         duration:0,
-         endTime:0,
-      })
-    })
+        startTime: time,
+        url: window.location.pathname,
+        duration: 0,
+        endTime: 0,
+      });
+    });
     //单页面应用触发的replaceState事件上报
-    window.addEventListener('replaceState',() => {
+    window.addEventListener('replaceState', () => {
       recordNextPage();
-    })
+    });
     //浏览器回退，前进时间行为出发
-    window.addEventListener('popstate',() => {
+    window.addEventListener('popstate', () => {
       recordNextPage();
-    })
-    window.addEventListener('beforeunload',() => {
+    });
+    window.addEventListener('beforeunload', () => {
       const time = new Date().getTime();
-      routeList[routeList.length-1].endTime = time;
-      routeList[routeList.length-1].duration = time - routeList[routeList.length-1].startTime;
+      routeList[routeList.length - 1].endTime = time;
+      routeList[routeList.length - 1].duration = time - routeList[routeList.length - 1].startTime;
       // 推一个页面的停留记录
       routeList.push({
-       ...routeTemplate,
-         startTime:time,
-         url:window.location.pathname,
-         duration:0,
-         endTime:0,
-      })
-    })
-    console.log('routeList',routeList,'routeTemplate',routeTemplate,)
-  }
+        ...routeTemplate,
+        startTime: time,
+        url: window.location.pathname,
+        duration: 0,
+        endTime: 0,
+      });
+    });
+    console.log('routeList', routeList, 'routeTemplate', routeTemplate);
+  };
 }

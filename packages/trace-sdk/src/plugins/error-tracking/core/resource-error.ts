@@ -1,4 +1,4 @@
-import { ExceptionMetrics, mechanismType, ResourceErrorTarget } from '../types';
+import { ExceptionMetrics, mechanismType, ResourceErrorTarget, ErrorSeverity, ErrorCategory, ErrorEventType } from '../types/index';
 import { getErrorKey, getErrorUid } from '../utils/error-utils';
 
 export function initResourceError(errorHandler: (data: ExceptionMetrics) => void): void {
@@ -8,14 +8,38 @@ export function initResourceError(errorHandler: (data: ExceptionMetrics) => void
 
     const target = event.target as ResourceErrorTarget;
     const platformMatch = /Windows|Mac|Linux|Android|iOS/.exec(window.navigator.userAgent);
-    const exception = {
-      type: 'ResourceError',
+    const platform = platformMatch ? platformMatch[0] : 'unknown';
+
+    const severity = ErrorSeverity.HIGH;
+    const category = ErrorCategory.RESOURCE;
+
+    const exception: ExceptionMetrics = {
+      type: 'resource_error' as ErrorEventType,
       message: `Failed to load resource: ${target.src}`,
       timestamp: Date.now(),
       errorUid: getErrorUid(`${mechanismType.RS}-${target.src}-${target.tagName}`),
       url: window.location.href,
       userAgent: window.navigator.userAgent,
-      platform: platformMatch ? platformMatch[0] : 'unknown',
+      platform: platform,
+      severity,
+      category,
+      context: {
+        environment: 'production',
+        tags: {},
+        severity,
+        category,
+        deviceInfo: {
+          os: platform,
+          browser: navigator.userAgent.split(' ')[0],
+          device: /mobile|android|iphone|ipad/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+          screenResolution: `${window.screen.width}x${window.screen.height}`,
+        },
+        networkInfo: {
+          effectiveType: (navigator as any).connection?.effectiveType,
+          downlink: (navigator as any).connection?.downlink,
+          rtt: (navigator as any).connection?.rtt,
+        },
+      },
       mechanism: {
         type: mechanismType.RS,
         data: {
@@ -31,7 +55,7 @@ export function initResourceError(errorHandler: (data: ExceptionMetrics) => void
           outerHTML: target.outerHTML,
         },
       },
-    } as ExceptionMetrics;
+    };
 
     errorHandler(exception);
   };
