@@ -1,17 +1,15 @@
 import { initPerformanceObserver } from './core/PerformanceObserverMonitor';
 import { initMonitorAxios } from './core/RequestMonitor';
 import { initWebVitals } from './core/WebVitalsMonitor';
-import { Config } from './types/type';
-import { Tracker } from '../../core/Tracker';
+import { Callback, Config } from './types/type';
 
-export const performanceTracker = new Tracker({ endpoint: '/api/performance' });
 export const performanceTracking = {
-  init: () => {
-    initPerformanceObserver(performanceTracker.onPerformanceData);
-    initWebVitals(performanceTracker.onPerformanceData);
+  init: (callback: Callback) => {
+    initPerformanceObserver(callback);
+    initWebVitals(callback);
   },
-  initAxios: (config?: Config) => {
-    const http = initMonitorAxios(config);
+  initAxios: (callback: Callback, config?: Config) => {
+    const http = initMonitorAxios(callback, config);
     return http;
   },
 };
