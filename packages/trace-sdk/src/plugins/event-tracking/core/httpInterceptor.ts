@@ -1,8 +1,10 @@
-import { send } from 'process';
 import { httpMetrics } from '../types/types';
 
+type SendHandler = ((init?: any) => void) | null | undefined;
+type LoadHandler = (metrics: httpMetrics) => void;
+
 //调用proxyXmlHttp完成全局监听XMLHttpRequest
-export const proxyXmlHttp = (sendHandler: Function | null | undefined, loadHandler: Function) => {
+export const proxyXmlHttp = (sendHandler: SendHandler, loadHandler: LoadHandler) => {
   if ('XMLHttpRequest' in window && typeof window.XMLHttpRequest === 'function') {
     const oXMLHttpRequest = window.XMLHttpRequest;
     if (!(window as any).oXMLHttpRequest) {
@@ -53,36 +55,36 @@ export const proxyXmlHttp = (sendHandler: Function | null | undefined, loadHandl
 };
 
 //调用proxyFetch完成全局监听fetch
-export const proxyFetch = (sendHandler:Function | null |undefined,loadHandler:Function) => {
+export const proxyFetch = (sendHandler: SendHandler, loadHandler: LoadHandler) => {
   if ('fetch' in window && typeof window.fetch === 'function') {
     const oFetch = window.fetch;
-    if(!(window as any).oFetch) {
+    if (!(window as any).oFetch) {
       (window as any).oFetch = oFetch;
     }
-    (window as any).fetch = async (input:any, init:any) => {
-      if(typeof sendHandler === 'function') {
+    (window as any).fetch = async (input: any, init: any) => {
+      if (typeof sendHandler === 'function') {
         sendHandler(init);
-     }
-     let meteics = {} as httpMetrics;
-     meteics.method = init?.method || '';
-     meteics.url = (input && typeof input !== 'string' ? input?.url:input) || '';
-     meteics.body = init?.body || '';
-     meteics.requestTime = new Date().getTime();
+      }
+      let meteics = {} as httpMetrics;
+      meteics.method = init?.method || '';
+      meteics.url = (input && typeof input !== 'string' ? input?.url : input) || '';
+      meteics.body = init?.body || '';
+      meteics.requestTime = new Date().getTime();
 
-     return oFetch.call(window, input, init).then(async(respone) => {
-       const res = respone.clone();
-       meteics = {
-        ...meteics,
-        status: res.status,
-        statusText: res.statusText,
-        response: await res.text(),
-        responseTime: new Date().getTime(),
-       }
-       if(typeof loadHandler === 'function') {
-        loadHandler(meteics);
-       }
-       return respone;
-     })
-   }
+      return oFetch.call(window, input, init).then(async respone => {
+        const res = respone.clone();
+        meteics = {
+          ...meteics,
+          status: res.status,
+          statusText: res.statusText,
+          response: await res.text(),
+          responseTime: new Date().getTime(),
+        };
+        if (typeof loadHandler === 'function') {
+          loadHandler(meteics);
+        }
+        return respone;
+      });
+    };
   }
-}
+};
