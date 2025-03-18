@@ -57,7 +57,9 @@ class TraceSDK {
 
   // 初始化 Axios 拦截器
   public initAxios() {
-    return performanceTracking.initAxios();
+    return performanceTracking.initAxios(data => {
+      this.tracker.onPerformanceData(data);
+    });
   }
 }
 

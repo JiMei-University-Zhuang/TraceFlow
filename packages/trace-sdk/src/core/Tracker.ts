@@ -56,8 +56,8 @@ export class Tracker {
   };
 
   //自动上报性能监控的逻辑
-  public onPerformanceData = (data: Record<string, number>) => {
-    this.trackEvent('performance', data, data.lcp > 2500);
+  public onPerformanceData = (data: Record<string, any>) => {
+    this.trackEvent('performance', data, data?.lcp > 2500);
   };
 
   //行为上报
