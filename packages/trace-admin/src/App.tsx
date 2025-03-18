@@ -1,17 +1,12 @@
+import React from 'react';
 import { Layout, Menu } from 'antd';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Link, useRoutes } from 'react-router-dom';
 import { DashboardOutlined, BugOutlined, LineChartOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import './App.css';
 import logo from './assets/logo.png';
-
-import RealtimeOverview from './pages/RealtimeOverview/index';
-import ErrorMonitor from './pages/ErrorMonitor/index';
-import PerformanceAnalysis from './pages/PerformanceAnalysis/index';
-import UserBehavior from './pages/UserBehavior/index';
+import element from './route/index';
 
 const { Sider, Content } = Layout;
-
-import React from 'react';
 
 const App: React.FC = () => {
   const menuItems = [
@@ -52,7 +47,7 @@ const App: React.FC = () => {
       ),
     },
   ];
-
+  const routes = useRoutes(element);
   return (
     <Layout className="h-screen tech-bg">
       <Sider
@@ -82,12 +77,7 @@ const App: React.FC = () => {
 
       <Layout>
         <Content className="p-6 bg-opacity-90" style={{ background: '#151515' }}>
-          <Routes>
-            <Route path="/" element={<RealtimeOverview />} />
-            <Route path="/errors" element={<ErrorMonitor />} />
-            <Route path="/performance" element={<PerformanceAnalysis />} />
-            <Route path="/behavior" element={<UserBehavior />} />
-          </Routes>
+          {routes}
         </Content>
       </Layout>
     </Layout>
