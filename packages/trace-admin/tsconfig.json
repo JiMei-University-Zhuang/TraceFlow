@@ -10,7 +10,9 @@
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"]
 }

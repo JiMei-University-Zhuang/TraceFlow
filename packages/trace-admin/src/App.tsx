@@ -2,6 +2,7 @@ import { Layout, Menu } from 'antd';
 import { Routes, Route, Link } from 'react-router-dom';
 import { DashboardOutlined, BugOutlined, LineChartOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import './App.css';
+import logo from './assets/logo.png';
 
 import RealtimeOverview from './pages/RealtimeOverview/index';
 import ErrorMonitor from './pages/ErrorMonitor/index';
@@ -10,7 +11,9 @@ import UserBehavior from './pages/UserBehavior/index';
 
 const { Sider, Content } = Layout;
 
-const App = () => {
+import React from 'react';
+
+const App: React.FC = () => {
   const menuItems = [
     {
       key: '1',
@@ -62,6 +65,7 @@ const App = () => {
         }}
       >
         <div className="logo-container p-4 mb-4">
+          <img className="logo-png" src={logo} />
           <h1 className="text-xl font-bold text-gradient">DATA INSIGHT</h1>
         </div>
         <Menu
