@@ -1,4 +1,4 @@
-import { ErrorSeverity, ErrorCategory, ErrorContext, ExceptionMetrics, errorEventTypes } from '../types';
+import { ErrorSeverity, ErrorCategory, ErrorContext, ExceptionMetrics, ErrorEventType } from '../types';
 import { generateUniqueId } from '../../../utils';
 
 interface ErrorHandlerConfig {
@@ -44,7 +44,7 @@ export class EnhancedErrorHandler {
     const context = this.buildErrorContext(severity, category);
 
     return {
-      type: errorEventTypes.JS_ERROR,
+      type: 'js_error' as ErrorEventType,
       message: error.message,
       stack: error.stack,
       timestamp: Date.now(),

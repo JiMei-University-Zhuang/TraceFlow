@@ -1,6 +1,6 @@
 //监控页面的事件 负责记录和跟踪页面的事件
 
-import { OriginInformation } from '../../../core/types';
+import { OriginInformation } from '../types';
 
 // 派发出新的 Event
 const wr = (type: keyof History) => {

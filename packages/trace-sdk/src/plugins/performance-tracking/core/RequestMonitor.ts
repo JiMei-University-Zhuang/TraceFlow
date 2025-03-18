@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { Config, CustomRequestConfig } from '../types';
+import { Config, CustomRequestConfig, Callback } from '../types/index';
 
-const getRequestMonitor = (config?: Config) => {
+const getRequestMonitor = (callback: Callback, config?: Config) => {
   const instance = axios.create(config);
 
   // 初始化拦截器
@@ -24,7 +24,7 @@ const getRequestMonitor = (config?: Config) => {
             status: response.status,
             duration: performance.now() - metaData.startTime,
           };
-          console.log({ requestMonitor: sdkData }); //后续替换为上报
+          callback({ requestMonitor: sdkData });
         }
         return response;
       },
@@ -39,7 +39,7 @@ const getRequestMonitor = (config?: Config) => {
             duration: performance.now() - metaData.startTime,
             error: error.message,
           };
-          console.log({ requestMonitor: errorData }); //后续替换为上报
+          callback({ requestMonitor: errorData });
         }
         return Promise.reject(error);
       },
@@ -49,4 +49,4 @@ const getRequestMonitor = (config?: Config) => {
   return instance;
 };
 
-export const initMonitorAxios = (config?: Config) => getRequestMonitor(config);
+export const initMonitorAxios = (callback: Callback, config?: Config) => getRequestMonitor(callback, config);
