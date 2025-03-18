@@ -1,4 +1,4 @@
-import { PageInformation, TagInfo } from '../types/types';
+import { PageInformation, TagInfo } from '../types';
 
 // 基础类
 export interface IMetrics {

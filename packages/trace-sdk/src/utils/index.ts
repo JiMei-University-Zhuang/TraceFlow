@@ -1,5 +1,5 @@
 //获取页面信息
-import { PageInformation } from '../plugins/event-tracking/types/types';
+import { PageInformation } from '../plugins/event-tracking/types';
 
 export const utils = {
   version: '1.0.0',
