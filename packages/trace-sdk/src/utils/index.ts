@@ -32,3 +32,14 @@ export const getExtends = (): { page: string; timestamp: number | string } => {
 export function generateUniqueId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
+
+export function debounce(func: () => void, delay: number) {
+  let clickTimer: number | null = null;
+  if (clickTimer) {
+    clearTimeout(clickTimer);
+  }
+  clickTimer = window.setTimeout(() => {
+    func();
+    clickTimer = null;
+  }, delay);
+}
