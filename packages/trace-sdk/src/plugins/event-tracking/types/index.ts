@@ -24,7 +24,7 @@ export interface behaviorStack {
   name: metricsName;
   page: string;
   timestamp: number | string;
-  value: Object;
+  value: Record<string, unknown>;
 }
 
 export interface OriginInformation {

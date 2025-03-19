@@ -1,4 +1,4 @@
-import { httpMetrics } from '../types/types';
+import { httpMetrics } from '../types';
 
 type SendHandler = ((init?: any) => void) | null | undefined;
 type LoadHandler = (metrics: httpMetrics) => void;
