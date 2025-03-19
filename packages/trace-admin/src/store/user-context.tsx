@@ -1,4 +1,4 @@
-import { User } from '@/types';
+import { User } from '../types/index';
 import React from 'react';
 
 interface UserContextType {

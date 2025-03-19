@@ -1,4 +1,4 @@
-import { User } from '@/types';
+import { User } from '../types/index';
 import { Button, Form, Input } from 'antd';
 import FormItem from 'antd/es/form/FormItem';
 import React from 'react';

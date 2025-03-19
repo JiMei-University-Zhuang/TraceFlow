@@ -34,3 +34,8 @@ export interface LongTask {
   duration: number; // 持续时间（毫秒）
   name: string; // 使用entry.name作为任务类型标识
 }
+
+export interface User {
+  username: string;
+  password: string;
+}
