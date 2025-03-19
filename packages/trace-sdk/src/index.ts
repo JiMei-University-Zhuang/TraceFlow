@@ -1,8 +1,8 @@
 import { errorTracking } from './plugins/error-tracking/index';
 import { EventTracking } from './plugins/event-tracking/index';
 import { performanceTracking } from './plugins/performance-tracking/index';
-import { utils } from './utils/index';
 import { Tracker } from './core/Tracker';
+import { utils } from './utils';
 
 interface TraceSDKConfig {
   appId: string;
@@ -57,7 +57,9 @@ class TraceSDK {
 
   // 初始化 Axios 拦截器
   public initAxios() {
-    return performanceTracking.initAxios();
+    return performanceTracking.initAxios(data => {
+      this.tracker.onPerformanceData(data);
+    });
   }
 }
 

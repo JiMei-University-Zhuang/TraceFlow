@@ -8,8 +8,8 @@ export const performanceTracking = {
     initPerformanceObserver(callback);
     initWebVitals(callback);
   },
-  initAxios: (config?: Config) => {
-    const http = initMonitorAxios(config);
+  initAxios: (callback: Callback, config?: Config) => {
+    const http = initMonitorAxios(callback, config);
     return http;
   },
 };
