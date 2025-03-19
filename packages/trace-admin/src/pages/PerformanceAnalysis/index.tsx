@@ -4,9 +4,13 @@ import ReactECharts from 'echarts-for-react';
 import type { EChartsOption } from 'echarts';
 import { usePerformanceData } from '../../hooks/usePerformanceData';
 import { LongTask } from '@/types';
+import { TimeSelector } from '@/components/selectHeader';
+import createHeaderState from '@/store/createHeaderState';
+const useTimeState = createHeaderState();
 
 const PerformanceDashboard = () => {
   const { metrics, requests, resources, LongTask } = usePerformanceData();
+  const { timeState, onchangeTime } = useTimeState();
 
   // 核心性能指标图表
   const coreMetricsOption: EChartsOption = {
@@ -206,7 +210,24 @@ const PerformanceDashboard = () => {
   };
 
   return (
-    <div style={{ padding: 24 }}>
+    <div style={{ padding: 24, marginTop: 80 }}>
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          width: '100%',
+          height: 96,
+          zIndex: 1,
+          background: '#333',
+          borderBottom: '1px solid #f0f0f0',
+          padding: '0 0px',
+          display: 'flex',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+        }}
+      >
+        <TimeSelector time={timeState} onChangeTime={onchangeTime}></TimeSelector>{' '}
+      </div>
       <Row gutter={[16, 16]}>
         <Col span={12}>
           <Card title="核心性能指标">
