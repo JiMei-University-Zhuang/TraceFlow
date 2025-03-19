@@ -1,7 +1,7 @@
 import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
 import { AuthService, LoginResponseDto } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { User } from '../users/schemas/user.schema';
+import { User } from '../users/users.service';
 
 interface RegisterDto {
   username: string;

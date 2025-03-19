@@ -73,7 +73,7 @@ Content-Type: application/json
 1. 注册新用户：
 
 ```bash
-curl -X POST http://localhost:3000/auth/register \
+curl -X POST http://47.122.48.232:3000/auth/register \
   -H "Content-Type: application/json" \
   -d '{"username": "testuser", "email": "test@example.com", "password": "password123"}'
 ```
@@ -81,7 +81,7 @@ curl -X POST http://localhost:3000/auth/register \
 2. 登录用户：
 
 ```bash
-curl -X POST http://localhost:3000/auth/login \
+curl -X POST http://47.122.48.232:3000/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "testuser", "password": "password123"}'
 ```
@@ -89,13 +89,13 @@ curl -X POST http://localhost:3000/auth/login \
 3. 使用返回的 token 访问受保护的资源：
 
 ```bash
-curl -X GET http://localhost:3000/users \
+curl -X GET http://47.122.48.232:3000/users \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
 ### 使用 Postman
 
-1. 创建一个 POST 请求到 `http://localhost:3000/auth/register`，设置 Body 为 raw JSON：
+1. 创建一个 POST 请求到 `http://47.122.48.232:3000/auth/register`，设置 Body 为 raw JSON：
 
    ```json
    {
@@ -105,7 +105,7 @@ curl -X GET http://localhost:3000/users \
    }
    ```
 
-2. 创建一个 POST 请求到 `http://localhost:3000/auth/login`，设置 Body 为 raw JSON：
+2. 创建一个 POST 请求到 `http://47.122.48.232:3000/auth/login`，设置 Body 为 raw JSON：
 
    ```json
    {
@@ -114,7 +114,7 @@ curl -X GET http://localhost:3000/users \
    }
    ```
 
-3. 从登录响应中复制 `access_token`，然后创建一个 GET 请求到 `http://localhost:3000/users`，在 Headers 中添加：
+3. 从登录响应中复制 `access_token`，然后创建一个 GET 请求到 `http://47.122.48.232:3000/users`，在 Headers 中添加：
    ```
    Authorization: Bearer YOUR_ACCESS_TOKEN
    ```

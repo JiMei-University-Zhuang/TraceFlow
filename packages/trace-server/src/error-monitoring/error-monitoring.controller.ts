@@ -12,6 +12,13 @@ import { ErrorMonitoringService } from './error-monitoring.service';
 import { ErrorReportDto } from './dto/error-report.dto';
 import { ErrorQueryDto } from './dto/error-query.dto';
 
+// 定义返回类型
+interface SuccessResponse<T> {
+  success: boolean;
+  data: T;
+  message: string;
+}
+
 @Controller('error-monitoring')
 export class ErrorMonitoringController {
   constructor(
@@ -19,7 +26,9 @@ export class ErrorMonitoringController {
   ) {}
 
   @Post('report')
-  async reportError(@Body(ValidationPipe) errorReport: ErrorReportDto) {
+  async reportError(
+    @Body(ValidationPipe) errorReport: ErrorReportDto,
+  ): Promise<SuccessResponse<unknown>> {
     const savedError = await this.errorMonitoringService.saveError(errorReport);
     return {
       success: true,
@@ -29,7 +38,9 @@ export class ErrorMonitoringController {
   }
 
   @Get('query')
-  async queryErrors(@Query(ValidationPipe) query: ErrorQueryDto) {
+  async queryErrors(
+    @Query(ValidationPipe) query: ErrorQueryDto,
+  ): Promise<SuccessResponse<unknown>> {
     const result = await this.errorMonitoringService.queryErrors(query);
     return {
       success: true,
@@ -43,7 +54,7 @@ export class ErrorMonitoringController {
     @Param('appId', ParseUUIDPipe) appId: string,
     @Query('startTime') startTime?: string,
     @Query('endTime') endTime?: string,
-  ) {
+  ): Promise<SuccessResponse<unknown>> {
     const startTimestamp = startTime
       ? new Date(startTime).getTime()
       : undefined;
@@ -62,7 +73,9 @@ export class ErrorMonitoringController {
   }
 
   @Get('details/:errorUid')
-  async getErrorDetails(@Param('errorUid', ParseUUIDPipe) errorUid: string) {
+  async getErrorDetails(
+    @Param('errorUid', ParseUUIDPipe) errorUid: string,
+  ): Promise<SuccessResponse<unknown> | { success: boolean; message: string }> {
     const result = await this.errorMonitoringService.queryErrors({
       errorUid,
       page: 1,
@@ -87,7 +100,7 @@ export class ErrorMonitoringController {
   async getAppErrorSummary(
     @Param('appId', ParseUUIDPipe) appId: string,
     @Query('period') period: '24h' | '7d' | '30d' = '24h',
-  ) {
+  ): Promise<SuccessResponse<unknown>> {
     const now = new Date();
     let startTime: Date;
 

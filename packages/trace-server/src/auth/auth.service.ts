@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { User } from '../users/schemas/user.schema';
+import { User } from '../users/users.service';
 
 export interface LoginResponseDto {
   access_token: string;
@@ -23,9 +23,9 @@ export class AuthService {
   async validateUser(username: string, password: string): Promise<User> {
     try {
       const user = await this.usersService.findByUsername(username);
-      const isPasswordValid = await user.comparePassword(password);
 
-      if (!isPasswordValid) {
+      // 简单比较密码，实际应用中应该使用加密比较
+      if (user.password !== password) {
         throw new UnauthorizedException('密码不正确');
       }
 
@@ -37,7 +37,7 @@ export class AuthService {
 
   async login(user: User): Promise<LoginResponseDto> {
     const payload = {
-      sub: user._id,
+      sub: user.id,
       username: user.username,
       role: user.role,
     };
@@ -45,7 +45,7 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
       user: {
-        id: user._id.toString(),
+        id: user.id,
         username: user.username,
         email: user.email,
         role: user.role,
