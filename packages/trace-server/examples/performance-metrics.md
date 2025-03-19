@@ -7,7 +7,7 @@
 使用POST请求发送性能指标数据：
 
 ```bash
-curl -X POST http://localhost:3000/performance/metrics \
+curl -X POST http://47.122.48.232:3000/performance/metrics \
   -H "Content-Type: application/json" \
   -d '{
     "metricName": "FCP",
@@ -31,7 +31,7 @@ curl -X POST http://localhost:3000/performance/metrics \
 使用GET请求查询特定名称的性能指标：
 
 ```bash
-curl "http://localhost:3000/performance/metrics?metricName=FCP"
+curl "http://47.122.48.232:3000/performance/metrics?metricName=FCP"
 ```
 
 预期响应：
@@ -67,7 +67,7 @@ npm run start:dev
 
 ```bash
 # 发送LCP数据
-curl -X POST http://localhost:3000/performance/metrics \
+curl -X POST http://47.122.48.232:3000/performance/metrics \
   -H "Content-Type: application/json" \
   -d '{
     "metricName": "LCP",
@@ -76,7 +76,7 @@ curl -X POST http://localhost:3000/performance/metrics \
   }'
 
 # 发送CLS数据
-curl -X POST http://localhost:3000/performance/metrics \
+curl -X POST http://47.122.48.232:3000/performance/metrics \
   -H "Content-Type: application/json" \
   -d '{
     "metricName": "CLS",
@@ -89,10 +89,10 @@ curl -X POST http://localhost:3000/performance/metrics \
 
 ```bash
 # 查询LCP数据
-curl "http://localhost:3000/performance/metrics?metricName=LCP"
+curl "http://47.122.48.232:3000/performance/metrics?metricName=LCP"
 
 # 查询CLS数据
-curl "http://localhost:3000/performance/metrics?metricName=CLS"
+curl "http://47.122.48.232:3000/performance/metrics?metricName=CLS"
 ```
 
 ## 3. 按时间范围查询性能指标
@@ -104,19 +104,19 @@ curl "http://localhost:3000/performance/metrics?metricName=CLS"
 查询最近一小时的数据：
 
 ```bash
-curl "http://localhost:3000/performance/metrics/timerange?range=1h"
+curl "http://47.122.48.232:3000/performance/metrics/timerange?range=1h"
 ```
 
 查询最近一天的数据，并限制返回10条：
 
 ```bash
-curl "http://localhost:3000/performance/metrics/timerange?range=1d&limit=10"
+curl "http://47.122.48.232:3000/performance/metrics/timerange?range=1d&limit=10"
 ```
 
 查询最近一周的数据：
 
 ```bash
-curl "http://localhost:3000/performance/metrics/timerange?range=1w"
+curl "http://47.122.48.232:3000/performance/metrics/timerange?range=1w"
 ```
 
 ### 3.2 使用具体时间戳
@@ -124,7 +124,7 @@ curl "http://localhost:3000/performance/metrics/timerange?range=1w"
 查询指定时间范围的数据：
 
 ```bash
-curl "http://localhost:3000/performance/metrics/timerange?startTime=1678271400000&endTime=1678271500000&limit=10"
+curl "http://47.122.48.232:3000/performance/metrics/timerange?startTime=1678271400000&endTime=1678271500000&limit=10"
 ```
 
 参数说明：
