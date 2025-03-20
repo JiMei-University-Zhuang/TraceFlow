@@ -32,11 +32,9 @@ export class Tracker {
     //入队
     this.queueManager.enqueueEvent(event, isImmediate);
     //上报
-    this.stretageManager.sendBatch(
-      this.queueManager.flushQueue(isImmediate, limit),
-      this.stretageManager.selectStrategy(isImmediate, this.config.reportStrategy),
-      this.config.endpoint,
-    );
+    if (isImmediate) {
+      this.stretageManager.sendBatch(this.queueManager.flushQueue(true, limit), this.stretageManager.selectStrategy(true, this.config.reportStrategy), this.config.endpoint);
+    }
   };
 
   //自动上报
@@ -62,7 +60,11 @@ export class Tracker {
   //批量上报
   private initBatchFlush() {
     setInterval(() => {
-      this.trackEvent('sendBatch', false, undefined, this.BATCH_LIMIT);
+      // 直接处理批量队列中的存量事件
+      const events = this.queueManager.flushQueue(false, this.BATCH_LIMIT);
+      if (events.length > 0) {
+        this.stretageManager.sendBatch(events, this.stretageManager.selectStrategy(false, this.config.reportStrategy), this.config.endpoint);
+      }
     }, this.BATCH_INTERVAL);
   }
 

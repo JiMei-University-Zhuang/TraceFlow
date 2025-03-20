@@ -42,7 +42,7 @@ class TraceSDK {
       release: this.config.release,
       tags: this.config.tags,
       onError: error => {
-        this.tracker.trackEvent('error', error, true);
+        this.tracker.trackEvent('error', true, error);
       },
     });
 
@@ -51,14 +51,14 @@ class TraceSDK {
 
     // 初始化性能监控
     performanceTracking.init(data => {
-      this.tracker.onPerformanceData(data);
+      this.tracker.reportPerformance(data);
     });
   }
 
   // 初始化 Axios 拦截器
   public initAxios() {
     return performanceTracking.initAxios(data => {
-      this.tracker.onPerformanceData(data);
+      this.tracker.reportPerformance(data);
     });
   }
 }

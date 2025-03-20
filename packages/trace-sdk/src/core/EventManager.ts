@@ -1,8 +1,8 @@
 export const createBaseEvent = (eventType: string, eventData?: Record<string, any>) => {
   return {
     eventType,
-    eventData,
-    timeStamp: Date.now(),
+    ...eventData,
+    timestamp: Date.now(),
     pageUrl: window.location.href,
   };
 };

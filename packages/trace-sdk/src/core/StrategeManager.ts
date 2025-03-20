@@ -12,7 +12,7 @@ export class StretageManager {
       case 'IMG':
         return 'IMG';
       default:
-        return 'IMG';
+        return 'XHR';
     }
   }
 
