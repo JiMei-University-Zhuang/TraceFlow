@@ -1,7 +1,9 @@
-import { httpMetrics } from '../types';
+// import { start } from 'repl';
+import { httpMetrics, visitsData } from '../types';
+import { formatTimestamp } from './utils';
 
 type SendHandler = ((init?: any) => void) | null | undefined;
-type LoadHandler = (metrics: httpMetrics) => void;
+type LoadHandler = (metrics: httpMetrics, visits: visitsData) => void;
 
 //调用proxyXmlHttp完成全局监听XMLHttpRequest
 export const proxyXmlHttp = (sendHandler: SendHandler, loadHandler: LoadHandler) => {
@@ -15,6 +17,7 @@ export const proxyXmlHttp = (sendHandler: SendHandler, loadHandler: LoadHandler)
       const xhr = new oXMLHttpRequest();
       const { open, send } = xhr;
       let metrics = {} as httpMetrics;
+      let startTime = 0;
       xhr.open = (method, url) => {
         metrics.method = method;
         metrics.url = url;
@@ -22,7 +25,8 @@ export const proxyXmlHttp = (sendHandler: SendHandler, loadHandler: LoadHandler)
       };
       xhr.send = body => {
         metrics.body = body || '';
-        metrics.requestTime = new Date().getTime();
+        startTime = new Date().getTime();
+        metrics.requestTime = startTime;
         // sendHandler 可以在发送 Ajax 请求之前，挂载一些信息，比如 header 请求头
         // setRequestHeader 设置请求header，用来传输关键参数等
         // xhr.setRequestHeader('xxx-id', 'VQVE-QEBQ');
@@ -32,6 +36,7 @@ export const proxyXmlHttp = (sendHandler: SendHandler, loadHandler: LoadHandler)
         // XMLHttpRequest 添加了一个 loadend 事件监听器，
         // 该事件在请求完成后触发。它记录了一些重要的请求信息，如请求的状态码、状态文本和响应数据
         const { status, statusText, response } = xhr;
+        const responseTime = new Date().getTime();
         metrics = {
           ...metrics,
           status,
@@ -39,9 +44,15 @@ export const proxyXmlHttp = (sendHandler: SendHandler, loadHandler: LoadHandler)
           response,
           responseTime: new Date().getTime(),
         };
+        const visits: visitsData = {
+          visitTime: `${responseTime - startTime}ms`, // 计算请求耗时
+          routeInfo: window.location.pathname + window.location.search, // 当前页面路径
+          timeStamp: formatTimestamp(startTime), // 格式化时间戳
+          httpRequest: metrics.method, // 请求方法
+        };
         // console.log('metrics',metrics);
         if (typeof loadHandler === 'function') {
-          loadHandler(metrics);
+          loadHandler(metrics, visits);
         }
       });
       return xhr;
@@ -66,6 +77,7 @@ export const proxyFetch = (sendHandler: SendHandler, loadHandler: LoadHandler) =
         sendHandler(init);
       }
       let meteics = {} as httpMetrics;
+      const startTime = new Date().getTime(); // 记录请求开始时间
       meteics.method = init?.method || '';
       meteics.url = (input && typeof input !== 'string' ? input?.url : input) || '';
       meteics.body = init?.body || '';
@@ -73,6 +85,7 @@ export const proxyFetch = (sendHandler: SendHandler, loadHandler: LoadHandler) =
 
       return oFetch.call(window, input, init).then(async respone => {
         const res = respone.clone();
+        const responseTime = new Date().getTime(); // 记录请求完成时间
         meteics = {
           ...meteics,
           status: res.status,
@@ -80,8 +93,16 @@ export const proxyFetch = (sendHandler: SendHandler, loadHandler: LoadHandler) =
           response: await res.text(),
           responseTime: new Date().getTime(),
         };
+
+        // 计算访问数据
+        const visits: visitsData = {
+          visitTime: `${responseTime - startTime}ms`, // 计算请求耗时
+          routeInfo: window.location.pathname + window.location.search, // 当前页面路径
+          timeStamp: formatTimestamp(startTime), // 格式化时间戳
+          httpRequest: meteics.method, // 请求方法
+        };
         if (typeof loadHandler === 'function') {
-          loadHandler(meteics);
+          loadHandler(meteics, visits);
         }
         return respone;
       });

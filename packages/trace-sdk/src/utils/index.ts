@@ -1,4 +1,5 @@
 //获取页面信息
+import { formatTimestamp } from 'src/plugins/event-tracking/core/utils';
 import { PageInformation } from '../plugins/event-tracking/types';
 
 export const utils = {
@@ -25,7 +26,7 @@ export const getPageInfo = (): PageInformation => {
 export const getExtends = (): { page: string; timestamp: number | string } => {
   return {
     page: getPageInfo().pathname,
-    timestamp: new Date().getTime(),
+    timestamp: formatTimestamp(new Date().getTime()),
   };
 };
 

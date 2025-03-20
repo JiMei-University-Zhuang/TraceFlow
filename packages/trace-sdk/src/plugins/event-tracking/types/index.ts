@@ -109,3 +109,13 @@ export interface httpMetrics<T = any> {
    */
   response: T;
 }
+
+// 传给平台进行展示的数据
+export interface visitsData {
+  routeInfo: string;
+  timeStamp: string;
+  httpRequest: string;
+  visitTime: string;
+}
+
+export type visitsArray = visitsData[];
