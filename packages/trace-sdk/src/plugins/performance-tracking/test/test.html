@@ -11,21 +11,38 @@
     <div>
       <h1>性能监控测试页面</h1>
     </div>
-    
+
     <div>
       <button>测试按钮1</button>
       <button>测试按钮2</button>
-      <img src="./test.png" alt="test"/>
+      <img src="./test.png" alt="test" />
     </div>
 
-     <script>
-      TraceSDK.init();
-      const http=TraceSDK.initAxios();
-      http.get('/api/test');
-      
+    <script>
+      var myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+
+var raw = JSON.stringify({
+   "metricName": "FCP",
+   "value": 1200,
+   "timestamp": 1678271400000
+});
+
+var requestOptions = {
+   method: 'POST',
+   headers: myHeaders,
+   body: raw,
+   redirect: 'follow'
+};
+
+fetch('http://47.122.48.232:3000/performance/metrics', requestOptions)
+   .then(response => response.text())
+   .then(result => console.log(result))
+   .catch(error => console.log('error', error));
+
       setTimeout(() => {
         const start = Date.now();
-        while (Date.now() - start < 60) {} 
+        while (Date.now() - start < 60) {}
       }, 1000);
     </script>
   </body>

@@ -25,7 +25,7 @@ export class Tracker {
     this.initPageUnload();
   }
 
-  //手动上报：创建事件->入队->上报（即时）
+  //手动上报：创建事件->入队->上报
   public trackEvent = (eventType: string, isImmediate = false, eventData?: Record<string, any>, limit?: number) => {
     //创建事件
     const event = createBaseEvent(eventType, eventData);
