@@ -1,4 +1,4 @@
-import UserRawData from '../data/user_data.json';
+import UserRawData from '../data/userdata.json';
 
 type Visit = {
   routeInfo: string;

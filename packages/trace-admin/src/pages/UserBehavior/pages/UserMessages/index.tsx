@@ -54,13 +54,24 @@ export default function UserMessages() {
       ],
     },
   ];
+  const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
 
+    return `${h > 0 ? `${h}小时` : ''}${m > 0 ? `${m}分钟` : ''}${s > 0 ? `${s}秒` : ''}`;
+  };
   // 表格的列定义
   const columns = [
     { title: '用户ID', dataIndex: 'userID', key: 'userId' },
     { title: '用户名', dataIndex: 'userName', key: 'userName' },
     { title: '访问次数', dataIndex: 'visitCount', key: 'visitCount' },
-    { title: '访问时长', dataIndex: 'visitTime', key: 'visitTime' },
+    {
+      title: '访问时长',
+      dataIndex: 'visitTime',
+      key: 'visitTime',
+      render: (text: string) => formatTime(parseInt(text.replace('s', ''))),
+    },
     { title: '初次访问', dataIndex: 'firstVisit', key: 'firstVisit' },
     { title: '最后访问', dataIndex: 'lastVisit', key: 'lastVisit' },
   ];
