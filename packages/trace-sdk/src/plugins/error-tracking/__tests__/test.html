@@ -10,55 +10,55 @@
       // 等待DOM加载完成
       document.addEventListener('DOMContentLoaded', function () {
         try {
-          // 打印全局对象，查看SDK是如何暴露的
-          console.log('Global objects:', window.TraceSDK);
-
-          // 尝试初始化SDK
-          let traceSDK;
-
-          // 根据控制台输出，正确的路径是 window.TraceSDK.TraceSDK.errorTracking
-          if (window.TraceSDK && window.TraceSDK.TraceSDK && window.TraceSDK.TraceSDK.errorTracking) {
-            // 直接使用errorTracking对象
-            traceSDK = window.TraceSDK.TraceSDK.errorTracking;
-
-            // 如果有init方法，调用它但不使用返回值
-            if (typeof traceSDK.init === 'function') {
-              traceSDK.init({
-                appId: 'test-app',
-                reportUrl: 'http://localhost:3000/error-monitoring/report',
-                batchReport: true,
-                batchSize: 5,
-                batchTimeout: 3000,
-                queueSize: 100,
-              });
-              console.log('已调用errorTracking.init方法');
+            // 打印全局对象，查看SDK是如何暴露的
+            console.log('Global objects:', window.TraceSDK);
+            
+            // 尝试初始化SDK
+            let traceSDK;
+            
+            // 根据控制台输出，正确的路径是 window.TraceSDK.TraceSDK.errorTracking
+            if (window.TraceSDK && window.TraceSDK.TraceSDK && window.TraceSDK.TraceSDK.errorTracking) {
+                // 直接使用errorTracking对象
+                traceSDK = window.TraceSDK.TraceSDK.errorTracking;
+                
+                // 如果有init方法，调用它但不使用返回值
+                if (typeof traceSDK.init === 'function') {
+                    traceSDK.init({
+                        appId: 'test-app',
+                        reportUrl: 'http://47.122.48.232:3000/error-monitoring/report',
+                        batchReport: true,
+                        batchSize: 5,
+                        batchTimeout: 3000,
+                        queueSize: 100
+                    });
+                    console.log('已调用errorTracking.init方法');
+                }
+            } else {
+                console.error('无法找到正确的errorTracking对象');
+                return;
             }
-          } else {
-            console.error('无法找到正确的errorTracking对象');
-            return;
-          }
-
-          // 导出到全局，方便测试
-          window.traceSDK = traceSDK;
-
-          // 监听SDK上报事件
-          if (traceSDK && typeof traceSDK.on === 'function') {
-            traceSDK.on('error-report', function (report) {
-              console.log('错误上报数据：', report);
-            });
-            console.log('已添加error-report事件监听器');
-          } else {
-            console.warn('traceSDK没有on方法，无法监听事件');
-          }
-
-          console.log('SDK initialized:', traceSDK);
-
-          // 检查report方法
-          if (traceSDK && typeof traceSDK.report === 'function') {
-            console.log('traceSDK有report方法');
-          } else {
-            console.warn('traceSDK没有report方法，自定义错误上报可能无法使用');
-          }
+            
+            // 导出到全局，方便测试
+            window.traceSDK = traceSDK;
+            
+            // 监听SDK上报事件
+            if (traceSDK && typeof traceSDK.on === 'function') {
+                traceSDK.on('error-report', function(report) {
+                    console.log('错误上报数据：', report);
+                });
+                console.log('已添加error-report事件监听器');
+            } else {
+                console.warn('traceSDK没有on方法，无法监听事件');
+            }
+            
+            console.log('SDK initialized:', traceSDK);
+            
+            // 检查report方法
+            if (traceSDK && typeof traceSDK.report === 'function') {
+                console.log('traceSDK有report方法');
+            } else {
+                console.warn('traceSDK没有report方法，自定义错误上报可能无法使用');
+            }
         } catch (error) {
           console.error('初始化SDK失败:', error);
         }
