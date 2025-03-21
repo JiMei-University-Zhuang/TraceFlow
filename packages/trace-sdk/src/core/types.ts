@@ -35,7 +35,7 @@ export interface OriginInformation {
 export type TrackEvent = {
   eventType: string;
   eventData?: Record<string, any>;
-  timeStamp: number;
+  timestamp: number;
   pageUrl: string;
   userId?: string;
   attempts?: number; //重试次数
@@ -46,13 +46,13 @@ export type ReportHandler = (event: TrackEvent) => void;
 
 //SDK配置类型
 export interface TrackerConfig {
-  endpoint: string;//上报地址
+  endpoint: string; //上报地址
   autoTrack?: {
     pageView?: boolean; //自动跟踪页面访问
     click?: boolean; //自动跟踪点击事件
     performance?: boolean; //自动跟踪性能指标
-  };//自动跟踪配置
-  userId?: string;//用户id
+  }; //自动跟踪配置
+  userId?: string; //用户id
   reportStrategy?: 'BEACON' | 'XHR' | 'IMG' | 'auto'; //上报策略
 }
 
