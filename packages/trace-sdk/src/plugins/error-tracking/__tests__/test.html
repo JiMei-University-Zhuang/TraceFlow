@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TraceSDK 错误监控测试</title>
     <!-- 直接引入SDK -->
     <script src="../../../../dist/index.umd.min.js"></script>
     <script>
-    // 等待DOM加载完成
-    document.addEventListener('DOMContentLoaded', function() {
+      // 等待DOM加载完成
+      document.addEventListener('DOMContentLoaded', function () {
         try {
             // 打印全局对象，查看SDK是如何暴露的
             console.log('Global objects:', window.TraceSDK);
@@ -25,7 +25,7 @@
                 if (typeof traceSDK.init === 'function') {
                     traceSDK.init({
                         appId: 'test-app',
-                        reportUrl: 'http://localhost:3000/error-monitoring/report',
+                        reportUrl: 'http://47.122.48.232:3000/error-monitoring/report',
                         batchReport: true,
                         batchSize: 5,
                         batchTimeout: 3000,
@@ -60,164 +60,168 @@
                 console.warn('traceSDK没有report方法，自定义错误上报可能无法使用');
             }
         } catch (error) {
-            console.error('初始化SDK失败:', error);
+          console.error('初始化SDK失败:', error);
         }
-    });
+      });
 
-    // 测试函数
-    function testJsError() {
+      // 测试函数
+      function testJsError() {
         try {
-            nonExistentFunction();
+          nonExistentFunction();
         } catch (error) {
-            showResult('jsErrorResult', '已触发 JS 错误，请查看控制台和上报数据');
+          showResult('jsErrorResult', '已触发 JS 错误，请查看控制台和上报数据');
         }
-    }
+      }
 
-    function testPromiseError() {
-        Promise.reject(new Error('Promise 测试错误')).catch(function() {
-            showResult('jsErrorResult', '已触发 Promise 错误，请查看控制台和上报数据');
+      function testPromiseError() {
+        Promise.reject(new Error('Promise 测试错误')).catch(function () {
+          showResult('jsErrorResult', '已触发 Promise 错误，请查看控制台和上报数据');
         });
-    }
+      }
 
-    function testResourceError() {
+      function testResourceError() {
         var img = new Image();
-        img.onerror = function() {
-            showResult('jsErrorResult', '已触发资源加载错误，请查看控制台和上报数据');
+        img.onerror = function () {
+          showResult('jsErrorResult', '已触发资源加载错误，请查看控制台和上报数据');
         };
         img.src = 'nonexistent.jpg';
-    }
+      }
 
-    function testXHRSuccess() {
+      function testXHRSuccess() {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', 'https://jsonplaceholder.typicode.com/todos/1');
-        xhr.onload = function() {
-            showResult('httpResult', 'XHR 请求成功，请查看上报数据');
+        xhr.onload = function () {
+          showResult('httpResult', 'XHR 请求成功，请查看上报数据');
         };
-        xhr.onerror = function() {
-            showResult('httpResult', 'XHR 请求失败，请查看上报数据');
+        xhr.onerror = function () {
+          showResult('httpResult', 'XHR 请求失败，请查看上报数据');
         };
         xhr.send();
-    }
+      }
 
-    function testXHRError() {
+      function testXHRError() {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', 'https://nonexistent.example.com');
-        xhr.onload = function() {
-            showResult('httpResult', 'XHR 请求成功，请查看上报数据');
+        xhr.onload = function () {
+          showResult('httpResult', 'XHR 请求成功，请查看上报数据');
         };
-        xhr.onerror = function() {
-            showResult('httpResult', 'XHR 请求失败，请查看上报数据');
+        xhr.onerror = function () {
+          showResult('httpResult', 'XHR 请求失败，请查看上报数据');
         };
         xhr.send();
-    }
+      }
 
-    function testFetchSuccess() {
+      function testFetchSuccess() {
         fetch('https://jsonplaceholder.typicode.com/todos/1')
-            .then(function(response) { return response.json(); })
-            .then(function(data) {
-                showResult('httpResult', 'Fetch 请求成功，请查看上报数据');
-            })
-            .catch(function(error) {
-                showResult('httpResult', 'Fetch 请求失败，请查看上报数据');
-            });
-    }
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (data) {
+            showResult('httpResult', 'Fetch 请求成功，请查看上报数据');
+          })
+          .catch(function (error) {
+            showResult('httpResult', 'Fetch 请求失败，请查看上报数据');
+          });
+      }
 
-    function testFetchError() {
+      function testFetchError() {
         fetch('https://nonexistent.example.com')
-            .then(function(response) { return response.json(); })
-            .then(function(data) {
-                showResult('httpResult', 'Fetch 请求成功，请查看上报数据');
-            })
-            .catch(function(error) {
-                showResult('httpResult', 'Fetch 请求失败，请查看上报数据');
-            });
-    }
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (data) {
+            showResult('httpResult', 'Fetch 请求成功，请查看上报数据');
+          })
+          .catch(function (error) {
+            showResult('httpResult', 'Fetch 请求失败，请查看上报数据');
+          });
+      }
 
-    function testCustomError() {
+      function testCustomError() {
         var customError = {
-            type: 'custom_error',
-            name: 'BusinessError',
-            message: '业务逻辑错误',
-            metadata: {
-                userId: 'test-user',
-                action: 'test-action'
-            }
+          type: 'custom_error',
+          name: 'BusinessError',
+          message: '业务逻辑错误',
+          metadata: {
+            userId: 'test-user',
+            action: 'test-action',
+          },
         };
         window.traceSDK.report(customError);
         showResult('customResult', '已触发自定义错误，请查看上报数据');
-    }
+      }
 
-    function testCustomEvent() {
+      function testCustomEvent() {
         var customEvent = {
-            type: 'custom_event',
-            name: 'UserAction',
-            message: '用户执行了特定操作',
-            metadata: {
-                action: 'click',
-                target: 'test-button'
-            }
+          type: 'custom_event',
+          name: 'UserAction',
+          message: '用户执行了特定操作',
+          metadata: {
+            action: 'click',
+            target: 'test-button',
+          },
         };
         window.traceSDK.report(customEvent);
         showResult('customResult', '已触发自定义事件，请查看上报数据');
-    }
+      }
 
-    // 辅助函数：显示结果
-    function showResult(elementId, message) {
+      // 辅助函数：显示结果
+      function showResult(elementId, message) {
         document.getElementById(elementId).textContent = new Date().toLocaleTimeString() + ' - ' + message;
-    }
+      }
     </script>
     <style>
-        .test-btn {
-            margin: 10px;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-        }
-        .test-btn:hover {
-            background-color: #45a049;
-        }
-        .test-group {
-            margin: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-        .result {
-            margin: 10px;
-            padding: 10px;
-            border-left: 4px solid #2196F3;
-            background-color: #f5f5f5;
-        }
+      .test-btn {
+        margin: 10px;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        background-color: #4caf50;
+        color: white;
+        cursor: pointer;
+      }
+      .test-btn:hover {
+        background-color: #45a049;
+      }
+      .test-group {
+        margin: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+      }
+      .result {
+        margin: 10px;
+        padding: 10px;
+        border-left: 4px solid #2196f3;
+        background-color: #f5f5f5;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>TraceSDK 错误监控测试页面</h1>
 
     <div class="test-group">
-        <h2>1. JavaScript 错误测试</h2>
-        <button class="test-btn" onclick="testJsError()">触发 JS 错误</button>
-        <button class="test-btn" onclick="testPromiseError()">触发 Promise 错误</button>
-        <button class="test-btn" onclick="testResourceError()">触发资源加载错误</button>
-        <div id="jsErrorResult" class="result"></div>
+      <h2>1. JavaScript 错误测试</h2>
+      <button class="test-btn" onclick="testJsError()">触发 JS 错误</button>
+      <button class="test-btn" onclick="testPromiseError()">触发 Promise 错误</button>
+      <button class="test-btn" onclick="testResourceError()">触发资源加载错误</button>
+      <div id="jsErrorResult" class="result"></div>
     </div>
 
     <div class="test-group">
-        <h2>2. HTTP 请求测试</h2>
-        <button class="test-btn" onclick="testXHRSuccess()">测试 XHR 成功请求</button>
-        <button class="test-btn" onclick="testXHRError()">测试 XHR 失败请求</button>
-        <button class="test-btn" onclick="testFetchSuccess()">测试 Fetch 成功请求</button>
-        <button class="test-btn" onclick="testFetchError()">测试 Fetch 失败请求</button>
-        <div id="httpResult" class="result"></div>
+      <h2>2. HTTP 请求测试</h2>
+      <button class="test-btn" onclick="testXHRSuccess()">测试 XHR 成功请求</button>
+      <button class="test-btn" onclick="testXHRError()">测试 XHR 失败请求</button>
+      <button class="test-btn" onclick="testFetchSuccess()">测试 Fetch 成功请求</button>
+      <button class="test-btn" onclick="testFetchError()">测试 Fetch 失败请求</button>
+      <div id="httpResult" class="result"></div>
     </div>
 
     <div class="test-group">
-        <h2>3. 自定义错误测试</h2>
-        <button class="test-btn" onclick="testCustomError()">触发自定义错误</button>
-        <button class="test-btn" onclick="testCustomEvent()">触发自定义事件</button>
-        <div id="customResult" class="result"></div>
+      <h2>3. 自定义错误测试</h2>
+      <button class="test-btn" onclick="testCustomError()">触发自定义错误</button>
+      <button class="test-btn" onclick="testCustomEvent()">触发自定义事件</button>
+      <div id="customResult" class="result"></div>
     </div>
-</body>
+  </body>
 </html>

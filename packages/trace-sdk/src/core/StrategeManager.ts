@@ -50,7 +50,6 @@ export class StretageManager {
   private sendWithImage(events: TrackEvent[], endpoint: string) {
     const params = new URLSearchParams();
     params.set('data', btoa(JSON.stringify(events)));
-
     const img = new Image();
     img.src = `${endpoint}?${params}`;
     img.onload = img.onerror = () => img.remove();

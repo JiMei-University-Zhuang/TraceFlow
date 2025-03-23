@@ -1,10 +1,12 @@
 import { IMetrics, UserMetricsStore } from './core/base';
-import { metricsName, OriginInformation } from './types';
+import { metricsName, OriginInformation, visitsArray, visitsData } from './types';
 import { getExtends, getPageInfo } from '../../utils/index';
 import { getOriginInfo, proxyHash, proxyHistory, wrHistory } from './core/eventTracker';
 import behaviorStore from './core/behaviorStore';
 import { proxyFetch, proxyXmlHttp } from './core/httpInterceptor';
 import { recordNextPage, routeList, routeTemplate } from './core/monitor';
+// import { format } from 'path';
+import { formatTimestamp } from './core/utils';
 
 const PI = metricsName.PI;
 const RCR = metricsName.RCR;
@@ -22,6 +24,7 @@ export class EventTracking {
   private metrics: UserMetricsStore;
   public breadcrumbs: behaviorStore;
   public maxBehaviorRecords: number;
+  public visits: visitsArray;
   //允许捕获click事件的DOM标签比如button,div,img
   clickMountList: Array<string>;
   constructor() {
@@ -29,6 +32,8 @@ export class EventTracking {
     this.metrics = new UserMetricsStore();
     //限制最大行为追踪记录数
     this.maxBehaviorRecords = 100;
+    this.visits = [];
+
     // 首次进入页面初始化记录
     //    const time = new Date().getTime();
     //    routeList.push({
@@ -66,9 +71,9 @@ export class EventTracking {
     const handler = () => {
       const metrics = {
         //记得传入一些表示用户身份信息比如userID
-
+        //需要等用户登录后才能获取到
         //创建时间
-        timeStamp: new Date().getTime(),
+        timeStamp: formatTimestamp(new Date().getTime()),
         //页面信息
         pageInfo: getPageInfo(),
         //用户来源
@@ -76,7 +81,7 @@ export class EventTracking {
       };
       this.metrics.set(metricsName.PI, metrics);
       //数据上报
-      console.log('meteics:', metrics);
+      // console.log('meteics:', metrics);
     };
     handler();
     proxyHash(handler);
@@ -84,7 +89,15 @@ export class EventTracking {
   };
   //获取路由改变的基本信息
   initRouteChange = (): void => {
+    // let startTime =  new Date().getTime();
     const handler = (e: Event) => {
+      // const leaveTime = new Date().getTime();
+      // const visitTime = leaveTime - startTime;
+      // startTime = leaveTime;
+      // const httpRequests = window.performance.getEntriesByType("resource")
+      // .filter((res) => res.initiatorType === "xmlhttprequest" || res.initiatorType === "fetch")
+      // .map((res) => res.name);
+
       //数据记录
       const metrics = {
         jumpType: e.type,
@@ -94,14 +107,24 @@ export class EventTracking {
       this.metrics.set(metricsName.RCR, metrics);
       // console.log('用户输入的数据', this.metrics);
 
+      //上报平台想要的数据路由改变的信息
+      // const visits: visitsData = {
+      //   visitTime:`${visitTime}ms`,
+      //   routeInfo:   window.location.pathname + window.location.search,
+      //   timeStamp: formatTimestamp(startTime),
+      //   httpRequest: 'GET',
+      // };
+
+      // console.log('路由改变', visits);
+
       const behavior = {
         category: RCR,
         data: metrics,
         ...getExtends(),
       };
       this.breadcrumbs.push(behavior);
-      console.log('metrics', metrics);
-      console.log('behavior', behavior);
+      // console.log('metrics', metrics);
+      // console.log('behavior', behavior);
     };
     proxyHash(handler);
     proxyHistory(handler);
@@ -123,7 +146,7 @@ export class EventTracking {
         pageInfo: getPageInfo(),
       } as IMetrics;
       this.metrics.set(metricsName.CBR, meteics);
-      console.log('点击事件：', meteics);
+      // console.log('点击事件：', meteics);
 
       const behavior = {
         category: metricsName.CBR,
@@ -141,14 +164,15 @@ export class EventTracking {
   };
   //初始化http请求的数据获取与上报
   initHttpHandler = (): void => {
-    const loadHandler = (metrics: any) => {
+    const loadHandler = (metrics: any, visits: visitsData) => {
       if (metrics.status < 400) {
         //对于正常请求的http不需要记录请求体和响应体
         delete metrics.body;
         delete metrics.response;
       }
+      this.visits.push(visits);
       this.metrics.set(metricsName.HT, metrics);
-      console.log('http请求', metrics);
+      // console.log('http请求', metrics);
       //记录到用户行为记录栈
       this.breadcrumbs.push({
         category: metricsName.HT,
@@ -193,10 +217,13 @@ export class EventTracking {
         endTime: 0,
       });
     });
-    console.log('routeList', routeList, 'routeTemplate', routeTemplate);
+    // console.log('routeList', routeList, 'routeTemplate', routeTemplate);
   };
   // 输出所有用户存储的数据
   getAll = (): any => {
     console.log('用户行为数据', this.metrics);
+    console.log('用户行为记录', this.breadcrumbs);
+    console.log('用户访问量', this.visits);
+    console.log('用户留存时间', routeList);
   };
 }
