@@ -10,11 +10,15 @@ async function getWebVitals(callback: Callback): Promise<void> {
     getFirstPaint(),
   ]);
   callback({
-    LCP: LCP,
-    FCP: FCP,
-    TTFB: TTFB,
-    CLS: CLS,
-    FP: FP,
+    //测试,后续改为对应数据结构
+    CLS,
+    FCP,
+    LCP,
+    TTFB,
+    FP,
+    metricName: 'FCP',
+    value: 1200,
+    timestamp: 1678271400000,
   });
   function getFirstPaint(): Promise<number> {
     return new Promise(resolve => {

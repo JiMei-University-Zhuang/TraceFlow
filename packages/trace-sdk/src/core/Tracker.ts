@@ -1,5 +1,4 @@
 import { TrackerConfig } from './types';
-// import {debounce} from '../utils/index'
 import { QueueManager } from './QueueManager';
 import { StretageManager } from './StrategeManager';
 import { createBaseEvent } from './EventManager';
@@ -25,7 +24,7 @@ export class Tracker {
     this.initPageUnload();
   }
 
-  //手动上报：创建事件->入队->上报（即时）
+  //手动上报：创建事件->入队->上报
   public trackEvent = (eventType: string, isImmediate = false, eventData?: Record<string, any>, limit?: number) => {
     //创建事件
     const event = createBaseEvent(eventType, eventData);
@@ -40,7 +39,7 @@ export class Tracker {
   //自动上报
   //性能自动上报（即时+批量）
   public reportPerformance = (data: Record<string, any>) => {
-    this.trackEvent('performance', data?.lcp > 2500, data);
+    this.trackEvent('performance', false, data);
   };
   //行为自动上报(即时＋批量)
   public reportBehavior(type: string, data: Record<string, any>, immediate = type === 'pv') {
@@ -86,16 +85,4 @@ export class Tracker {
   //     }
   //   });
   // }
-
-  //防抖实现的自动点击上报逻辑
-  // private handleAutoClick=debounce((e: MouseEvent)=>{
-  //   const target = e.target as HTMLElement;
-  //      if (target?.dataset?.trackEvent) {
-  //        this.trackEvent('click', {
-  //          element: target.tagName,
-  //          content: target.textContent?.trim(),
-  //          eventName: target.dataset.trackEvent,
-  //        });
-  //      }
-  // },200)
 }

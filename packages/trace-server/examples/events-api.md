@@ -13,7 +13,7 @@ pnpm install
 pnpm start:dev
 ```
 
-服务器默认运行在 http://localhost:3000
+服务器默认运行在 http://47.122.48.232:3000
 
 ## API 示例
 
@@ -22,7 +22,7 @@ pnpm start:dev
 #### 请求
 
 ```bash
-curl http://localhost:3000/events?page=1&limit=10
+curl http://47.122.48.232:3000/events?page=1&limit=10
 ```
 
 #### 参数说明
@@ -49,7 +49,7 @@ curl http://localhost:3000/events?page=1&limit=10
 #### 请求
 
 ```bash
-curl -X POST http://localhost:3000/events \
+curl -X POST http://47.122.48.232:3000/events \
   -H "Content-Type: application/json" \
   -d '{
     "type": "page_view",
@@ -79,7 +79,7 @@ curl -X POST http://localhost:3000/events \
 #### 请求
 
 ```bash
-curl http://localhost:3000/events/stats
+curl http://47.122.48.232:3000/events/stats
 ```
 
 #### 响应
@@ -179,7 +179,7 @@ curl http://localhost:3000/events/stats
 
 1. 打开 Postman
 2. 创建新的 POST 请求
-3. 设置请求 URL 为 `http://localhost:3000/events`
+3. 设置请求 URL 为 `http://47.122.48.232:3000/events`
 4. 设置 Content-Type header 为 `application/json`
 5. 在请求体中填入上述示例中的任意一个事件数据
 6. 点击发送并查看响应
