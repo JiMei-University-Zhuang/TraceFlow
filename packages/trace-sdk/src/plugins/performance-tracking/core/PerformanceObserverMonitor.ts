@@ -16,7 +16,13 @@ function getResource(callback: Callback) {
         // @ts-expect-error: transferSize在浏览器已经被打印出，必然存在，但是ts报错
         size: entry.transferSize,
       };
-      callback({ Resource: data }); //模拟资源数据上报
+      callback({
+        //后续需要修改数据结构
+        data,
+        metricName: 'FCP',
+        value: 12345,
+        timestamp: 1678271400000,
+      }); //模拟资源数据上报
     });
   });
   observer.observe({ type: 'resource', buffered: true });

@@ -7,7 +7,7 @@ import json from '@rollup/plugin-json'; // 解析JSON文件
 import nodePolyfills from 'rollup-plugin-polyfill-node';
 
 export default {
-  input: 'src/plugins/event-tracking/text/text.ts', // 输入文件，通常是项目的主入口文件
+  input: 'src/index.ts',
   output: {
     file: 'dist/bundle.js', // 输出文件路径
     format: 'umd', // UMD格式，适用于浏览器和Node.js

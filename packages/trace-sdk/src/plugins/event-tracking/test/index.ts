@@ -2,7 +2,7 @@ import { EventTracking } from '..';
 // import { UserMetricsStore } from '../core/base';
 
 const text = new EventTracking();
-console.log(text);
+// console.log(text);
 const button = document.getElementById('getAllDataButton');
 if (button) {
   button.addEventListener('click', () => {

@@ -1,0 +1,37 @@
+{
+  "performanceMetrics": [
+    {
+      "timestamp": 1717027200000,
+      "LCP": 2.5,
+      "FP": 1.2,
+      "FCP": 1.5,
+      "CLS": 0.15,
+      "firstScreenTime": 2.8
+    }
+  ],
+  "apiRequests": [
+    {
+      "timestamp": 1717027200000,
+      "url": "/home",
+      "duration": 350,
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "resourceLoads": [
+    {
+      "timestamp": 1717027200000,
+      "url": "/home",
+      "type": "script",
+      "duration": 150,
+      "size": 10240
+    }
+  ],
+  "LongTask": [
+    {
+      "startTime": 1720320000123,
+      "duration": 150,
+      "name": "script-execution"
+    }
+  ]
+}

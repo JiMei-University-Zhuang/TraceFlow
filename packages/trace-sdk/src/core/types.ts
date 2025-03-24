@@ -35,7 +35,7 @@ export interface OriginInformation {
 export type TrackEvent = {
   eventType: string;
   eventData?: Record<string, any>;
-  timeStamp: number;
+  timestamp: number;
   pageUrl: string;
   userId?: string;
   attempts?: number; //重试次数

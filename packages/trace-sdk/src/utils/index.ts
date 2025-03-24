@@ -1,4 +1,5 @@
 //获取页面信息
+import { formatTimestamp } from 'src/plugins/event-tracking/core/utils';
 import { PageInformation } from '../plugins/event-tracking/types';
 
 export const utils = {
@@ -25,10 +26,21 @@ export const getPageInfo = (): PageInformation => {
 export const getExtends = (): { page: string; timestamp: number | string } => {
   return {
     page: getPageInfo().pathname,
-    timestamp: new Date().getTime(),
+    timestamp: formatTimestamp(new Date().getTime()),
   };
 };
 
 export function generateUniqueId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
+export function debounce(func: () => void, delay: number) {
+  let clickTimer: number | null = null;
+  if (clickTimer) {
+    clearTimeout(clickTimer);
+  }
+  clickTimer = window.setTimeout(() => {
+    func();
+    clickTimer = null;
+  }, delay);
 }
