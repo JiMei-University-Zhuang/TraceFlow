@@ -1,5 +1,9 @@
 import { Endpoint, ReportStrategy, TrackEvent } from './types';
 export class StretageManager {
+  onError?: (failedEvents: TrackEvent[] | TrackEvent) => void;
+  constructor(onError?: (failedEvents: TrackEvent[] | TrackEvent) => void) {
+    this.onError = onError;
+  }
   selectStrategy(isImmediate: boolean, reportStrategy: ReportStrategy | undefined | 'auto'): ReportStrategy {
     if (isImmediate) {
       return this.supportBeacon() ? 'BEACON' : 'XHR';
@@ -31,7 +35,7 @@ export class StretageManager {
           break;
       }
     } catch (error) {
-      console.error('上报失败，重新入队', events);
+      this.onError?.(events);
     }
   }
 

@@ -38,7 +38,7 @@ export type TrackEvent = {
   timestamp: number;
   pageUrl: string;
   userId?: string;
-  attempts?: number; //重试次数
+  attempts: number; //重试次数
 };
 
 //上报函数类型

@@ -8,7 +8,7 @@ export class Tracker {
   private readonly BATCH_INTERVAL = 5000;
   private readonly BATCH_LIMIT = 20;
   private queueManager = new QueueManager();
-  private stretageManager = new StretageManager();
+  private stretageManager = new StretageManager(this.queueManager.reEnqueue.bind(this.queueManager));
   constructor(config: TrackerConfig) {
     this.config = {
       autoTrack: {
@@ -80,14 +80,4 @@ export class Tracker {
       this.trackEvent('sendAllImeediate', true);
     });
   }
-
-  //上报失败重新入队
-  // private reEnqueue(events: TrackEvent[]) {
-  //   events.forEach(event => {
-  //     if (event.attempts && event.attempts < 3) {
-  //       event.attempts++;
-  //       this.enqueueEvent(event, this.isCriticalEvent(event));
-  //     }
-  //   });
-  // }
 }

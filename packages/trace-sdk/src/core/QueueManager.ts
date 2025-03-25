@@ -30,4 +30,15 @@ export class QueueManager {
     this.immediateQueue = [];
     return event;
   }
+  //优化：重新入队
+  reEnqueue(events: TrackEvent | TrackEvent[]) {
+    const normalized = Array.isArray(events) ? events : [events];
+
+    normalized.forEach(event => {
+      if (event.attempts < 2) {
+        event.attempts += 1;
+        this.enqueueEvent(event, this.isCriticalEvent(event));
+      }
+    });
+  }
 }
