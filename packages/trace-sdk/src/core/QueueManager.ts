@@ -19,14 +19,15 @@ export class QueueManager {
   }
 
   //取出队列事件
-  flushQueue(isImmediate: boolean, limit?: number): TrackEvent[] {
+  flushQueue(isImmediate: boolean, limit?: number): TrackEvent[] | TrackEvent | [] {
     const queue = isImmediate ? this.immediateQueue : this.batchQueue;
     if (!isImmediate) {
       const events = limit ? queue.slice(0, limit) : queue;
       this.batchQueue = queue.slice(limit);
       return events;
     }
+    const event = this.immediateQueue[0];
     this.immediateQueue = [];
-    return queue;
+    return event;
   }
 }

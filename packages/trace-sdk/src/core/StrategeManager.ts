@@ -1,4 +1,4 @@
-import { ReportStrategy, TrackEvent } from './types';
+import { Endpoint, ReportStrategy, TrackEvent } from './types';
 export class StretageManager {
   selectStrategy(isImmediate: boolean, reportStrategy: ReportStrategy | undefined | 'auto'): ReportStrategy {
     if (isImmediate) {
@@ -16,17 +16,18 @@ export class StretageManager {
     }
   }
 
-  sendBatch(events: TrackEvent[], strategy: ReportStrategy, endpoint: string) {
+  sendBatch(events: TrackEvent[] | TrackEvent, strategy: ReportStrategy, endpoint: Endpoint, isImmediate: boolean) {
+    const reportUrl = isImmediate ? endpoint.immediate : endpoint.batch;
     try {
       switch (strategy) {
         case 'BEACON':
-          this.sendWithBeacon(events, endpoint);
+          this.sendWithBeacon(events, reportUrl);
           break;
         case 'XHR':
-          this.sendWithXHR(events, endpoint);
+          this.sendWithXHR(events, reportUrl);
           break;
         case 'IMG':
-          this.sendWithImage(events, endpoint);
+          this.sendWithImage(events, reportUrl);
           break;
       }
     } catch (error) {
@@ -34,20 +35,20 @@ export class StretageManager {
     }
   }
 
-  private sendWithBeacon(events: TrackEvent[], endpoint: string) {
+  private sendWithBeacon(events: TrackEvent[] | TrackEvent, endpoint: string) {
     const blob = new Blob([JSON.stringify(events)], {
       type: 'application/json',
     });
     navigator.sendBeacon(endpoint, blob);
   }
 
-  private sendWithXHR(events: TrackEvent[], endpoint: string) {
+  private sendWithXHR(events: TrackEvent[] | TrackEvent, endpoint: string) {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', endpoint);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(JSON.stringify(events));
   }
-  private sendWithImage(events: TrackEvent[], endpoint: string) {
+  private sendWithImage(events: TrackEvent[] | TrackEvent, endpoint: string) {
     const params = new URLSearchParams();
     params.set('data', btoa(JSON.stringify(events)));
     const img = new Image();
