@@ -1,4 +1,4 @@
-import { IsString, IsNumber } from 'class-validator';
+import { IsString, IsNumber, IsOptional } from 'class-validator';
 
 export class PerformanceMetricDto {
   @IsString()
@@ -9,4 +9,16 @@ export class PerformanceMetricDto {
 
   @IsNumber()
   timestamp: number;
+
+  @IsString()
+  @IsOptional()
+  pageUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  userAgent?: string;
+
+  @IsString()
+  @IsOptional()
+  appId?: string;
 }

@@ -9,25 +9,24 @@ import { Type } from 'class-transformer';
 
 export class CreateEventDto {
   @IsString()
-  type: string;
+  eventType: string;
 
   @IsNumber()
   timestamp: number;
 
   @IsString()
-  url: string;
-
-  @IsString()
-  @IsOptional()
-  userId?: string;
-
-  @IsString()
-  @IsOptional()
-  sessionId?: string;
+  pageUrl: string;
 
   @IsObject()
-  @IsOptional()
   @ValidateNested()
   @Type(() => Object)
-  data?: Record<string, any>;
+  eventData: Record<string, any>;
+
+  @IsString()
+  @IsOptional()
+  userAgent?: string;
+
+  @IsString()
+  @IsOptional()
+  appId?: string;
 }
