@@ -1,19 +1,30 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, Between } from 'typeorm';
 import { PerformanceMetricDto } from './dto/performance-metric.dto';
+import { PerformanceMetric } from './entities/performance-metric.entity';
 
 @Injectable()
 export class PerformanceService {
-  private metrics: PerformanceMetricDto[] = [];
+  constructor(
+    @InjectRepository(PerformanceMetric)
+    private performanceRepository: Repository<PerformanceMetric>,
+  ) {}
 
   // 保存性能指标数据
-  async saveMetric(metric: PerformanceMetricDto) {
-    this.metrics.push(metric);
-    return metric;
+  async saveMetric(
+    metricDto: PerformanceMetricDto,
+  ): Promise<PerformanceMetric> {
+    const metric = this.performanceRepository.create(metricDto);
+    return this.performanceRepository.save(metric);
   }
 
   // 获取指定名称的性能指标
-  async getMetricsByName(metricName: string) {
-    return this.metrics.filter((metric) => metric.metricName === metricName);
+  async getMetricsByName(metricName: string): Promise<PerformanceMetric[]> {
+    return this.performanceRepository.find({
+      where: { metricName },
+      order: { timestamp: 'DESC' },
+    });
   }
 
   // 获取指定时间范围内的性能指标
@@ -21,19 +32,13 @@ export class PerformanceService {
     startTime: number,
     endTime: number,
     limit?: number,
-  ) {
-    let result = this.metrics.filter(
-      (metric) => metric.timestamp >= startTime && metric.timestamp <= endTime,
-    );
-
-    // 按时间戳降序排序
-    result = result.sort((a, b) => b.timestamp - a.timestamp);
-
-    // 如果有限制，则只返回指定数量
-    if (limit) {
-      result = result.slice(0, limit);
-    }
-
-    return result;
+  ): Promise<PerformanceMetric[]> {
+    return this.performanceRepository.find({
+      where: {
+        timestamp: Between(startTime, endTime),
+      },
+      order: { timestamp: 'DESC' },
+      take: limit,
+    });
   }
 }
