@@ -66,7 +66,7 @@ export class Tracker {
     setInterval(() => {
       // 直接处理批量队列中的存量事件
       const events = this.queueManager.flushQueue(false, this.BATCH_LIMIT);
-      if (events) {
+      if (Array.isArray(events) && events.length > 0) {
         this.stretageManager.sendBatch(events, this.stretageManager.selectStrategy(false, this.config.reportStrategy), this.config.endpoint, false);
       }
     }, this.BATCH_INTERVAL);
