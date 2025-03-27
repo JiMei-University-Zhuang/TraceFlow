@@ -4,7 +4,7 @@ import { Link, useRoutes } from 'react-router-dom';
 import { DashboardOutlined, BugOutlined, LineChartOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import './App.css';
 import logo from './assets/logo.png';
-import element from './route/index';
+import router from './route';
 
 const { Sider, Content } = Layout;
 
@@ -47,7 +47,7 @@ const App: React.FC = () => {
       ),
     },
   ];
-  const routes = useRoutes(element);
+  const routes = useRoutes(router);
   return (
     <Layout className="h-screen tech-bg">
       <Sider
