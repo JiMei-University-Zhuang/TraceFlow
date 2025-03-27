@@ -45,13 +45,29 @@ export class EventsController {
       byType: {},
     };
 
+    // 确保每个事件都有eventType
+    const validEvents = events.filter((event) => {
+      if (!event.eventType) {
+        console.log('Skipping event without eventType:', event);
+        return false;
+      }
+      return true;
+    });
+
+    if (validEvents.length === 0) {
+      return new ApiResponse(
+        { error: 'No valid events found' },
+        '未找到有效事件',
+      );
+    }
+
     // 保存所有事件到数据库
-    await this.eventsService.createEvents(events);
+    await this.eventsService.createEvents(validEvents);
 
     // 处理每个事件
-    for (const event of events) {
+    for (const event of validEvents) {
       // 统计事件类型
-      const eventType = event.eventType || 'unknown';
+      const eventType = event.eventType;
       stats.byType[eventType] = (stats.byType[eventType] || 0) + 1;
 
       // 处理性能事件

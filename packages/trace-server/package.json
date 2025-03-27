@@ -8,8 +8,8 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "NODE_OPTIONS=\"--require=./scripts/setup.js\" nest start",
-    "start:dev": "NODE_OPTIONS=\"--require=./scripts/setup.js\" nest start --watch",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -18,7 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "import-test-data": "node scripts/import-test-data.mjs"
+    "import-test-data": "node scripts/import-test-data.mjs",
+    "test:db": "node scripts/test-db-connection.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -35,6 +36,8 @@
     "bcryptjs": "^3.0.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "dotenv": "^16.3.1",
+    "glob": "^11.0.1",
     "mongodb": "^5.8.0",
     "mongoose": "^7.4.0",
     "mysql2": "^3.14.0",

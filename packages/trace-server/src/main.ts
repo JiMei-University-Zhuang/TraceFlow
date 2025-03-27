@@ -1,3 +1,4 @@
+// 删除之前添加的crypto polyfill引用
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
