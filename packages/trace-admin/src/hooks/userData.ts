@@ -16,8 +16,17 @@ type UserData = {
   lastVisit: string;
 };
 
+type VisitData = {
+  userID: string;
+  userName: string;
+  routeInfo: string;
+  httpRequest: string;
+  visitTime: string;
+  timestamp: string;
+};
+
 // 生成最终的 UserData
-const UserData = UserRawData.map((user: any) => {
+const UserData: UserData[] = UserRawData.map((user: any) => {
   // 获取所有访问时间戳
   const timestamps = user.visits.map((visit: Visit) => visit.timestamp);
 
@@ -28,11 +37,23 @@ const UserData = UserRawData.map((user: any) => {
   return {
     userID: user.userID,
     userName: user.userName,
-    visitCount: user.visitCount,
+    visitCount: user.visits.length,
     visitTime: user.totalVisitTime,
     firstVisit: firstVisit,
     lastVisit: lastVisit,
   };
 });
 
-export { UserData };
+// 生成最终的 VisitData
+const VisitData: VisitData[] = UserRawData.flatMap((user: any) =>
+  user.visits.map((visit: Visit) => ({
+    userID: user.userID,
+    userName: user.userName,
+    routeInfo: visit.routeInfo,
+    httpRequest: visit.httpRequest,
+    visitTime: visit.visitTime,
+    timestamp: visit.timestamp,
+  })),
+);
+
+export { UserData, VisitData };

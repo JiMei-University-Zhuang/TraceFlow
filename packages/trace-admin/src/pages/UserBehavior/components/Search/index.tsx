@@ -5,7 +5,7 @@ import { Form, Input, Select, Button, Space } from 'antd';
 interface FieldConfig {
   label: string;
   name: string;
-  type: 'input' | 'select';
+  type: 'input' | 'select' | 'multiselect';
   options?: { label: string; value: string }[];
 }
 
@@ -18,10 +18,10 @@ const Search: React.FC<SearchProps> = ({ fields, onSubmit }) => {
   const { control, handleSubmit } = useForm({
     defaultValues: fields.reduce(
       (acc, field) => {
-        acc[field.name] = field.type === 'select' ? '' : '';
+        acc[field.name] = field.type === 'multiselect' ? [] : '';
         return acc;
       },
-      {} as Record<string, string>,
+      {} as Record<string, any>,
     ),
   });
 
@@ -42,7 +42,7 @@ const Search: React.FC<SearchProps> = ({ fields, onSubmit }) => {
             <Controller
               name={field.name}
               control={control}
-              defaultValue={field.type === 'select' ? '' : ''}
+              defaultValue={field.type === 'multiselect' ? [] : ''}
               render={({ field: controllerField }) =>
                 field.type === 'input' ? (
                   <Input
@@ -67,6 +67,24 @@ const Search: React.FC<SearchProps> = ({ fields, onSubmit }) => {
                     }}
                   >
                     <Select.Option value="">请选择</Select.Option>
+                    {field.options?.map(option => (
+                      <Select.Option key={option.value} value={option.value}>
+                        {option.label}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                ) : field.type === 'multiselect' ? (
+                  <Select
+                    {...controllerField}
+                    mode="multiple"
+                    allowClear
+                    style={{
+                      width: '200px',
+                      backgroundColor: '#1a1a1a',
+                      color: 'white',
+                      padding: '4px 8px',
+                    }}
+                  >
                     {field.options?.map(option => (
                       <Select.Option key={option.value} value={option.value}>
                         {option.label}
