@@ -8,7 +8,7 @@ export class Tracker {
   private readonly BATCH_INTERVAL = 5000;
   private readonly BATCH_LIMIT = 20;
   private queueManager = new QueueManager();
-  private stretageManager = new StretageManager();
+  private stretageManager = new StretageManager(this.queueManager.reEnqueue.bind(this.queueManager));
   constructor(config: TrackerConfig) {
     this.config = {
       autoTrack: {
@@ -32,7 +32,12 @@ export class Tracker {
     this.queueManager.enqueueEvent(event, isImmediate);
     //上报
     if (isImmediate) {
-      this.stretageManager.sendBatch(this.queueManager.flushQueue(true, limit), this.stretageManager.selectStrategy(true, this.config.reportStrategy), this.config.endpoint);
+      this.stretageManager.sendBatch(
+        this.queueManager.flushQueue(true, limit),
+        this.stretageManager.selectStrategy(true, this.config.reportStrategy),
+        this.config.endpoint,
+        isImmediate,
+      );
     }
   };
 
@@ -61,8 +66,8 @@ export class Tracker {
     setInterval(() => {
       // 直接处理批量队列中的存量事件
       const events = this.queueManager.flushQueue(false, this.BATCH_LIMIT);
-      if (events.length > 0) {
-        this.stretageManager.sendBatch(events, this.stretageManager.selectStrategy(false, this.config.reportStrategy), this.config.endpoint);
+      if (Array.isArray(events) && events.length > 0) {
+        this.stretageManager.sendBatch(events, this.stretageManager.selectStrategy(false, this.config.reportStrategy), this.config.endpoint, false);
       }
     }, this.BATCH_INTERVAL);
   }
@@ -75,14 +80,4 @@ export class Tracker {
       this.trackEvent('sendAllImeediate', true);
     });
   }
-
-  //上报失败重新入队
-  // private reEnqueue(events: TrackEvent[]) {
-  //   events.forEach(event => {
-  //     if (event.attempts && event.attempts < 3) {
-  //       event.attempts++;
-  //       this.enqueueEvent(event, this.isCriticalEvent(event));
-  //     }
-  //   });
-  // }
 }
