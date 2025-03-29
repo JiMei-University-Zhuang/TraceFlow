@@ -1,4 +1,4 @@
-import { Callback } from '../types/type';
+import { Callback } from '../types';
 
 function getResource(callback: Callback) {
   const observer = new PerformanceObserver(list => {

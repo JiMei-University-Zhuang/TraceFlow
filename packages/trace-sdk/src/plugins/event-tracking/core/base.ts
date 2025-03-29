@@ -1,11 +1,11 @@
-import { PageInformation, TagInfo } from '../types/types';
+import { PageInformation, TagInfo } from '../types';
 
 // 基础类
 export interface IMetrics {
   jumpType?: string; // 事件类型，如 "click" | "keydown"
-  timeStamp: number; // 时间戳（毫秒）
+  timeStamp: number | string; // 时间戳（毫秒）
   pageInfo: PageInformation;
-  tagInfo: TagInfo;
+  tagInfo?: TagInfo;
 }
 
 export class UserMetricsStore {

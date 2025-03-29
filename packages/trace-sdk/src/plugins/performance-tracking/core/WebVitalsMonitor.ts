@@ -1,5 +1,5 @@
 import { onCLS, onFCP, onLCP, onTTFB } from 'web-vitals';
-import { Callback } from '../types/type';
+import { Callback } from '../types';
 
 async function getWebVitals(callback: Callback): Promise<void> {
   const [CLS, FCP, LCP, TTFB, FP] = await Promise.all([
@@ -10,11 +10,11 @@ async function getWebVitals(callback: Callback): Promise<void> {
     getFirstPaint(),
   ]);
   callback({
-    LCP: LCP,
-    FCP: FCP,
-    TTFB: TTFB,
-    CLS: CLS,
-    FP: FP,
+    CLS,
+    FCP,
+    LCP,
+    TTFB,
+    FP,
   });
   function getFirstPaint(): Promise<number> {
     return new Promise(resolve => {

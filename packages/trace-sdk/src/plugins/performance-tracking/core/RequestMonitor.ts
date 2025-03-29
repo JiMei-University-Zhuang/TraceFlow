@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Config, CustomRequestConfig, Callback } from '../types/type';
+import { Config, CustomRequestConfig, Callback } from '../types/index';
 
 const getRequestMonitor = (callback: Callback, config?: Config) => {
   const instance = axios.create(config);

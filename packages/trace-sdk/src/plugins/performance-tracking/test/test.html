@@ -11,22 +11,21 @@
     <div>
       <h1>性能监控测试页面</h1>
     </div>
-    
+
     <div>
       <button>测试按钮1</button>
       <button>测试按钮2</button>
-      <img src="./test.png" alt="test"/>
+      <img src="./test.png" alt="test" />
     </div>
 
-     <script>
-      TraceSDK.init();
-      const http=TraceSDK.initAxios();
-      http.get('/api/test');
-      
+    <script>
       setTimeout(() => {
         const start = Date.now();
-        while (Date.now() - start < 60) {} 
+        while (Date.now() - start < 60) {}
       }, 1000);
+      //模拟xhr请求错误
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", "https://www.error123.com/xxx");
     </script>
   </body>
 </html>

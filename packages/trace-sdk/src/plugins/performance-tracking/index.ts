@@ -1,7 +1,7 @@
 import { initPerformanceObserver } from './core/PerformanceObserverMonitor';
 import { initMonitorAxios } from './core/RequestMonitor';
 import { initWebVitals } from './core/WebVitalsMonitor';
-import { Callback, Config } from './types/type';
+import { Callback, Config } from './types';
 
 export const performanceTracking = {
   init: (callback: Callback) => {

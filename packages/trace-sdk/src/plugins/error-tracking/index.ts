@@ -12,7 +12,7 @@ interface ErrorTrackingConfig {
   environment?: string;
   release?: string;
   tags?: Record<string, string>;
-  onError?: (error: ExceptionMetrics) => void;
+  onError?: (error: { eventData: ExceptionMetrics }) => void;
 }
 
 class ErrorTracking {
@@ -72,7 +72,7 @@ class ErrorTracking {
 
       // 触发错误回调，将错误数据传递给 Tracker
       if (this.config.onError) {
-        this.config.onError(errorEvent);
+        this.config.onError({ eventData: errorEvent });
       }
     } catch (e) {
       console.error('Error handling failed:', e);

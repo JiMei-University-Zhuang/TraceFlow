@@ -1,0 +1,65 @@
+import { Endpoint, ReportStrategy, TrackEvent } from './types';
+export class StretageManager {
+  onError?: (failedEvents: TrackEvent[] | TrackEvent) => void;
+  constructor(onError?: (failedEvents: TrackEvent[] | TrackEvent) => void) {
+    this.onError = onError;
+  }
+  selectStrategy(isImmediate: boolean, reportStrategy: ReportStrategy | undefined | 'auto'): ReportStrategy {
+    if (isImmediate) {
+      return this.supportBeacon() ? 'BEACON' : 'XHR';
+    }
+    switch (reportStrategy) {
+      case 'BEACON':
+        return 'BEACON';
+      case 'XHR':
+        return 'XHR';
+      case 'IMG':
+        return 'IMG';
+      default:
+        return 'XHR';
+    }
+  }
+
+  sendBatch(events: TrackEvent[] | TrackEvent, strategy: ReportStrategy, endpoint: Endpoint, isImmediate: boolean) {
+    const reportUrl = isImmediate ? endpoint.immediate : endpoint.batch;
+    try {
+      switch (strategy) {
+        case 'BEACON':
+          this.sendWithBeacon(events, reportUrl);
+          break;
+        case 'XHR':
+          this.sendWithXHR(events, reportUrl);
+          break;
+        case 'IMG':
+          this.sendWithImage(events, reportUrl);
+          break;
+      }
+    } catch (error) {
+      this.onError?.(events);
+    }
+  }
+
+  private sendWithBeacon(events: TrackEvent[] | TrackEvent, endpoint: string) {
+    const blob = new Blob([JSON.stringify(events)], {
+      type: 'application/json',
+    });
+    navigator.sendBeacon(endpoint, blob);
+  }
+
+  private sendWithXHR(events: TrackEvent[] | TrackEvent, endpoint: string) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', endpoint);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify(events));
+  }
+  private sendWithImage(events: TrackEvent[] | TrackEvent, endpoint: string) {
+    const params = new URLSearchParams();
+    params.set('data', btoa(JSON.stringify(events)));
+    const img = new Image();
+    img.src = `${endpoint}?${params}`;
+    img.onload = img.onerror = () => img.remove();
+  }
+  private supportBeacon(): boolean {
+    return typeof navigator.sendBeacon === 'function';
+  }
+}

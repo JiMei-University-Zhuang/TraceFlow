@@ -1,12 +1,13 @@
 {
   "name": "@traceflow/sdk",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "TraceFlow SDK for client-side tracking",
   "main": "index.js",
   "scripts": {
     "dev": "tsx src/plugins/event-tracking/text.ts",
     "format": "prettier --write .",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "publish": "npm publish --access public"
   },
   "keywords": [
     "sdk",
