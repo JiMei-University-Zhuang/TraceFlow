@@ -1,113 +1,114 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, ConfigProvider } from 'antd';
 import type { TableProps } from 'antd';
+import { getError } from '@/apis/request';
 
 interface ErrorType {
-  interfaceNumber: number;
-  info: string;
-  statusCode: number;
-  time: string;
-  requestTime: string;
-  params: string;
-  eventNumber: number;
-  userNumber: number;
+  _id: string;
+  appId: string;
+  errorUid: string;
+  message: string;
+  stack?: string;
+  type: string;
+  severity: string;
+  category: string;
+  timestamp: number;
+  url: string;
+  userAgent?: string;
+  context: {
+    userId: string;
+    environment: string;
+  };
 }
+
 const columns: TableProps<ErrorType>['columns'] = [
   {
-    title: '端口号',
-    dataIndex: 'interfaceNumber',
-    key: 'interfaceNumber',
+    title: '应用ID',
+    dataIndex: 'appId',
+    key: 'appId',
+  },
+  {
+    title: '错误UID',
+    dataIndex: 'errorUid',
+    key: 'errorUid',
   },
   {
     title: '错误信息',
-    dataIndex: 'info',
-    key: 'info',
+    dataIndex: 'message',
+    key: 'message',
   },
   {
-    title: '状态码',
-    dataIndex: 'statusCode',
-    key: 'statusCode',
+    title: '错误类型',
+    dataIndex: 'type',
+    key: 'type',
+  },
+  {
+    title: '严重程度',
+    dataIndex: 'severity',
+    key: 'severity',
+  },
+  {
+    title: '错误类别',
+    dataIndex: 'category',
+    key: 'category',
   },
   {
     title: '时间',
-    dataIndex: 'time',
-    key: 'time',
+    dataIndex: 'timestamp',
+    key: 'timestamp',
+    render: (timestamp: number) => new Date(timestamp).toLocaleString(), // 转换时间戳
   },
   {
-    title: '请求耗时',
-    dataIndex: 'requestTime',
-    key: 'requestTime',
+    title: 'URL',
+    dataIndex: 'url',
+    key: 'url',
   },
   {
-    title: '请求参数',
-    dataIndex: 'params',
-    key: 'params',
+    title: '用户代理',
+    dataIndex: 'userAgent',
+    key: 'userAgent',
   },
   {
-    title: '事件数',
-    dataIndex: 'eventNumber',
-    key: 'eventNumber',
+    title: '用户ID',
+    dataIndex: ['context', 'userId'],
+    key: 'context.userId',
   },
   {
-    title: '用户数',
-    dataIndex: 'userNumber',
-    key: 'userNumber',
+    title: '环境',
+    dataIndex: ['context', 'environment'],
+    key: 'context.environment',
   },
 ];
 
-const ErrorData: ErrorType[] = [
-  {
-    interfaceNumber: 403,
-    info: 'Request failed with status code 500',
-    statusCode: 500,
-    time: '7/21/2021. 14:31:22',
-    requestTime: '10ms',
-    params: '{params:params}',
-    eventNumber: 160,
-    userNumber: 105,
-  },
-  {
-    interfaceNumber: 403,
-    info: 'Request failed with status code 500',
-    statusCode: 500,
-    time: '7/21/2021. 14:31:22',
-    requestTime: '10ms',
-    params: '{params:params}',
-    eventNumber: 160,
-    userNumber: 105,
-  },
-  {
-    interfaceNumber: 403,
-    info: 'Request failed with status code 500',
-    statusCode: 500,
-    time: '7/21/2021. 14:31:22',
-    requestTime: '10ms',
-    params: '{params:params}',
-    eventNumber: 160,
-    userNumber: 105,
-  },
-  {
-    interfaceNumber: 403,
-    info: 'Request failed with status code 500',
-    statusCode: 500,
-    time: '7/21/2021. 14:31:22',
-    requestTime: '10ms',
-    params: '{params:params}',
-    eventNumber: 160,
-    userNumber: 105,
-  },
-  {
-    interfaceNumber: 403,
-    info: 'Request failed with status code 500',
-    statusCode: 500,
-    time: '7/21/2021. 14:31:22',
-    requestTime: '10ms',
-    params: '{params:params}',
-    eventNumber: 160,
-    userNumber: 105,
-  },
-];
 export const HttpError = () => {
+  const [errorData, setErrorData] = useState<ErrorType[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getError({ type: 'http' });
+        console.log('响应数据:', response); // 打印响应数据
+
+        if (response.data.data?.items) {
+          const formattedData = response.data.data.items.map((item: ErrorType) => ({
+            ...item,
+            key: item._id,
+          }));
+          console.log('格式化后的数据:', formattedData); // 打印格式化后的数据
+          setErrorData(formattedData);
+        }
+      } catch (error) {
+        console.error('数据获取失败:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // useEffect(() => {
+  //   console.log('errorData:', errorData); // 打印 errorData 确认数据是否设置正确
+  // }, [errorData]);
+
   return (
     <ConfigProvider
       theme={{
@@ -121,7 +122,7 @@ export const HttpError = () => {
         },
       }}
     >
-      <Table<ErrorType> columns={columns} dataSource={ErrorData} />
+      <Table<ErrorType> columns={columns} dataSource={errorData} />
     </ConfigProvider>
   );
 };

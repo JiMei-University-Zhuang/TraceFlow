@@ -9,15 +9,10 @@ import createHeaderState from '@/store/createHeaderState';
 const useTimeState = createHeaderState();
 
 const PerformanceDashboard = () => {
-  const {
-    metrics = [],
-    requests = [],
-    resources = [],
-    LongTask = [],
-  } = usePerformanceData({
-    range: '7d',
-    limit: '10',
-  });
+  const { metrics = [], requests = [], resources = [], longTasks = [] } = usePerformanceData({ metricName: 'LCP' });
+  // const {requests = []}=usePerformanceData({metricName:'apiRequest'})
+  // const {resources = []}=usePerformanceData({metricName:'resources'})
+  // const {longTasks = []}=usePerformanceData({metricName:'longTasks'})
   const { timeState, onchangeTime } = useTimeState();
 
   // 核心性能指标图表
@@ -194,7 +189,7 @@ const PerformanceDashboard = () => {
         name: '长任务',
         type: 'scatter',
         symbolSize: data => Math.min(data[1] / 5, 30), // 根据持续时间调整大小
-        data: LongTask?.map(task => ({
+        data: longTasks?.map(task => ({
           value: [task.startTime, task.duration],
           name: task.name,
         })),
