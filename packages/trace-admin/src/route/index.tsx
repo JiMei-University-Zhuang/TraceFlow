@@ -7,7 +7,6 @@ import { PromiseError } from '../pages/ErrorMonitor/PromiseError';
 import { StaticResourceError } from '../pages/ErrorMonitor/StaticResourceError';
 import { HttpError } from '../pages/ErrorMonitor/HttpError';
 import VisitMessages from '@/pages/UserBehavior/pages/VisitMessages';
-import VisualCharts from '@/pages/UserBehavior/pages/VisualCharts';
 
 const routes = [
   { path: '/', element: <RealtimeOverview /> },
@@ -46,11 +45,6 @@ const routes = [
         key: '1',
         label: '访问信息',
         element: <VisitMessages />,
-      },
-      {
-        key: '2',
-        label: '数据可视化',
-        element: <VisualCharts />,
       },
     ],
   },

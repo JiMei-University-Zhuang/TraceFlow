@@ -2,7 +2,6 @@ import { ConfigProvider, Tabs } from 'antd';
 import type { TabsProps } from 'antd';
 import VistMessages from './pages/VisitMessages/index';
 import UserMessages from './pages/UserMessages/index';
-import VisualCharts from './pages/VisualCharts/index';
 
 const items: TabsProps['items'] = [
   {
@@ -14,11 +13,6 @@ const items: TabsProps['items'] = [
     key: '2',
     label: '用户信息',
     children: <UserMessages />,
-  },
-  {
-    key: '3',
-    label: '数据可视化',
-    children: <VisualCharts />,
   },
 ];
 
