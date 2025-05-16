@@ -4,5 +4,6 @@ export const createBaseEvent = (eventType: string, eventData?: Record<string, an
     ...eventData,
     timestamp: Date.now(),
     pageUrl: window.location.href,
+    attempts: 0,
   };
 };

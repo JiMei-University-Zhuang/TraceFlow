@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>批量事件上报测试</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    pre {
+      background: #f7f7f7;
+      padding: 15px;
+      border-radius: 4px;
+      overflow: auto;
+      margin-top: 20px;
+    }
+    .event-group {
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h1>批量事件上报测试</h1>
+  
+  <div class="event-group">
+    <h2>选择测试场景</h2>
+    <button id="sendPerformance">测试性能事件</button>
+    <button id="sendMixed">测试混合事件</button>
+    <button id="simulateSDK">模拟SDK批量上报</button>
+  </div>
+
+  <div class="event-group">
+    <h2>响应结果</h2>
+    <pre id="result">等待发送事件...</pre>
+  </div>
+
+  <script>
+    const SERVER_URL = 'http://localhost:3000';
+    const resultEl = document.getElementById('result');
+
+    // 更新结果显示
+    function updateResult(data, title = '响应结果') {
+      resultEl.innerHTML = `<strong>${title}</strong>\n\n${
+        typeof data === 'string' ? data : JSON.stringify(data, null, 2)
+      }`;
+    }
+
+    // 发送批量事件数据
+    async function sendBatchEvents(events) {
+      try {
+        updateResult('正在发送数据...');
+        
+        // 使用fetch API发送请求
+        const response = await fetch(`${SERVER_URL}/events/batch`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(events),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`服务器响应错误: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        updateResult(result);
+        
+        return result;
+      } catch (error) {
+        updateResult(`发送失败: ${error.message}`, '错误');
+        console.error('发送批量事件失败:', error);
+      }
+    }
+
+    // 测试数据 - 纯性能事件
+    const performanceEvents = [
+      {
+        eventType: 'performance',
+        timestamp: Date.now(),
+        pageUrl: window.location.href,
+        eventData: {
+          LCP: 2500,
+          FCP: 1200,
+          CLS: 0.1,
+          TTFB: 800
+        }
+      },
+      {
+        eventType: 'performance',
+        timestamp: Date.now() - 60000, // 1分钟前
+        pageUrl: 'https://example.com/other-page',
+        eventData: {
+          LCP: 3000,
+          FP: 900,
+          FID: 35
+        }
+      }
+    ];
+
+    // 测试数据 - 混合事件
+    const mixedEvents = [
+      ...performanceEvents,
+      {
+        eventType: 'behavior_click',
+        timestamp: Date.now(),
+        pageUrl: window.location.href,
+        eventData: {
+          element: 'button',
+          content: 'Submit',
+          selector: '#submitBtn'
+        }
+      },
+      {
+        eventType: 'error',
+        timestamp: Date.now(),
+        pageUrl: window.location.href,
+        eventData: {
+          message: 'Uncaught TypeError: Cannot read property of undefined',
+          stack: 'TypeError: Cannot read property of undefined\n    at processData (app.js:45)\n    at handleClick (app.js:12)',
+          severity: 'error'
+        }
+      }
+    ];
+
+    // 模拟SDK批量上报行为
+    function simulateSDKBatch() {
+      // 创建随机数量的事件
+      const events = [];
+      const eventTypes = ['performance', 'behavior_click', 'behavior_pv', 'error'];
+      const eventCount = Math.floor(Math.random() * 10) + 5; // 5-15个事件
+      
+      for (let i = 0; i < eventCount; i++) {
+        const typeIndex = Math.floor(Math.random() * eventTypes.length);
+        const type = eventTypes[typeIndex];
+        
+        let eventData = {};
+        
+        // 根据事件类型生成不同的数据
+        if (type === 'performance') {
+          eventData = {
+            LCP: Math.floor(Math.random() * 4000) + 1000,
+            FCP: Math.floor(Math.random() * 2000) + 500,
+            TTFB: Math.floor(Math.random() * 1000) + 100
+          };
+        } else if (type.startsWith('behavior')) {
+          eventData = {
+            element: ['button', 'link', 'image'][Math.floor(Math.random() * 3)],
+            content: `测试内容 ${i}`
+          };
+        } else if (type === 'error') {
+          eventData = {
+            message: `测试错误 ${i}`,
+            stack: `Error: 测试错误 ${i}\n    at test.js:${i*10}`
+          };
+        }
+        
+        events.push({
+          eventType: type,
+          timestamp: Date.now() - Math.floor(Math.random() * 300000), // 过去5分钟内的随机时间
+          pageUrl: `https://example.com/page${i % 3}`,
+          eventData
+        });
+      }
+      
+      updateResult({
+        message: '模拟SDK批量上报',
+        eventCount,
+        events
+      }, '准备发送的数据');
+      
+      // 等待2秒后发送，这样用户可以看到准备发送的数据
+      setTimeout(() => {
+        sendBatchEvents(events);
+      }, 2000);
+    }
+
+    // 添加按钮点击事件
+    document.getElementById('sendPerformance').addEventListener('click', () => {
+      sendBatchEvents(performanceEvents);
+    });
+    
+    document.getElementById('sendMixed').addEventListener('click', () => {
+      sendBatchEvents(mixedEvents);
+    });
+    
+    document.getElementById('simulateSDK').addEventListener('click', () => {
+      simulateSDKBatch();
+    });
+  </script>
+</body>
+</html> 

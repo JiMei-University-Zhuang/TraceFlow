@@ -3,10 +3,11 @@ import { EventTracking } from './plugins/event-tracking/index';
 import { performanceTracking } from './plugins/performance-tracking/index';
 import { Tracker } from './core/Tracker';
 import { utils } from './utils';
+import { Endpoint } from './core/types';
 
 interface TraceSDKConfig {
   appId: string;
-  reportUrl: string;
+  reportUrl: Endpoint;
   errorFilter?: (error: unknown) => boolean;
   environment?: string;
   release?: string;
