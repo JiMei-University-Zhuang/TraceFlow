@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { ErrorMonitoringModule } from './error-monitoring/error-monitoring.module';
 import { EventsModule } from './events/events.module';
 import { PerformanceModule } from './performance/performance.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { PerformanceModule } from './performance/performance.module';
       envFilePath: '.env',
       isGlobal: true,
     }),
+    DatabaseModule,
     // UsersModule,
     // AuthModule,
     ErrorMonitoringModule,

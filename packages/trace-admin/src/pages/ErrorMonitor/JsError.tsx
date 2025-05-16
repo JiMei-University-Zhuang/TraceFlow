@@ -1,91 +1,83 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, ConfigProvider } from 'antd';
 import type { TableProps } from 'antd';
+import { getError } from '@/apis/request';
 
 interface ErrorType {
-  fileName: string;
-  Info: string;
+  _id: string;
+  appId: string;
+  errorUid: string;
+  message: string;
+  stack?: string;
   type: string;
-  time: string;
-  eventNumber: number;
-  userNumber: number;
+  severity: string;
+  category: string;
+  timestamp: number;
+  url: string;
+  userAgent?: string;
+  context: {
+    userId: string;
+    environment: string;
+  };
 }
 const columns: TableProps<ErrorType>['columns'] = [
   {
     title: '错误文件',
-    dataIndex: 'fileName',
-    key: 'fileName',
+    dataIndex: 'stack',
+    key: 'stack',
   },
   {
     title: '错误信息',
-    dataIndex: 'Info',
-    key: 'Info',
+    dataIndex: 'message',
+    key: 'message',
   },
   {
     title: '错误类型',
-    dataIndex: 'type',
-    key: 'type',
+    dataIndex: 'category',
+    key: 'category',
+  },
+  {
+    title: 'URL',
+    dataIndex: 'url',
+    key: 'url',
   },
   {
     title: '时间',
-    dataIndex: 'time',
-    key: 'time',
+    dataIndex: 'timestamp',
+    key: 'timestamp',
+    render: (timestamp: number) => new Date(timestamp).toLocaleString(), // 转换时间戳
   },
   {
-    title: '事件数',
-    dataIndex: 'eventNumber',
-    key: 'eventNumber',
-  },
-  {
-    title: '用户数',
-    dataIndex: 'userNumber',
-    key: 'userNumber',
+    title: '用户ID',
+    dataIndex: ['context', 'userId'],
+    key: 'context.userId',
   },
 ];
 
-const ErrorData: ErrorType[] = [
-  {
-    fileName: 'index.js',
-    Info: 'Uncaught TypeError:Cannot read property of undefined',
-    type: 'TypeError',
-    time: '7/21/2021. 14:31:22',
-    eventNumber: 160,
-    userNumber: 105,
-  },
-  {
-    fileName: 'index.js',
-    Info: 'Uncaught TypeError:Cannot read property of undefined',
-    type: 'TypeError',
-    time: '7/21/2021. 14:31:22',
-    eventNumber: 160,
-    userNumber: 105,
-  },
-  {
-    fileName: 'index.js',
-    Info: 'Uncaught TypeError:Cannot read property of undefined',
-    type: 'TypeError',
-    time: '7/21/2021. 14:31:22',
-    eventNumber: 160,
-    userNumber: 105,
-  },
-  {
-    fileName: 'index.js',
-    Info: 'Uncaught TypeError:Cannot read property of undefined',
-    type: 'TypeError',
-    time: '7/21/2021. 14:31:22',
-    eventNumber: 160,
-    userNumber: 105,
-  },
-  {
-    fileName: 'index.js',
-    Info: 'Uncaught TypeError:Cannot read property of undefined',
-    type: 'TypeError',
-    time: '7/21/2021. 14:31:22',
-    eventNumber: 160,
-    userNumber: 105,
-  },
-];
 export const JsError = () => {
+  const [errorData, setErrorData] = useState<ErrorType[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getError({ type: 'http' });
+        console.log('响应数据:', response); // 打印响应数据
+
+        if (response.data.data?.items) {
+          const formattedData = response.data.data.items.map((item: ErrorType) => ({
+            ...item,
+            key: item._id,
+          }));
+          console.log('格式化后的数据:', formattedData); // 打印格式化后的数据
+          setErrorData(formattedData);
+        }
+      } catch (error) {
+        console.error('数据获取失败:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
   return (
     <ConfigProvider
       theme={{
@@ -99,7 +91,7 @@ export const JsError = () => {
         },
       }}
     >
-      <Table<ErrorType> columns={columns} dataSource={ErrorData} />
+      <Table<ErrorType> columns={columns} dataSource={errorData} />
     </ConfigProvider>
   );
 };

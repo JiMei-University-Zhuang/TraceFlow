@@ -8,21 +8,73 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
+import { PerformanceService } from '../performance/performance.service';
+import { EventsService } from './events.service';
+import { ApiResponse } from '../common/dto/api-response.dto';
 
 @Controller('events')
 export class EventsController {
+  constructor(
+    private readonly performanceService: PerformanceService,
+    private readonly eventsService: EventsService,
+  ) {}
+
   @Post()
   @HttpCode(HttpStatus.OK)
   async createEvent(@Body() event: CreateEventDto) {
-    // 打印接收到的事件数据
-    console.log('Received event:', JSON.stringify(event, null, 2));
-    // 返回成功响应
+    // 保存事件到数据库
+    const savedEvent = await this.eventsService.createEvent(event);
+
     return {
       success: true,
       message: 'Event received successfully',
       timestamp: new Date().toISOString(),
-      event: event,
+      event: savedEvent,
     };
+  }
+
+  @Post('batch')
+  @HttpCode(HttpStatus.OK)
+  async processBatchEvents(@Body() events: CreateEventDto[]) {
+    console.log(`Processing ${events.length} batch events`);
+
+    // 统计计数器
+    const stats = {
+      total: events.length,
+      processed: 0,
+      byType: {},
+    };
+
+    // 保存所有事件到数据库
+    await this.eventsService.createEvents(events);
+
+    // 处理每个事件
+    for (const event of events) {
+      // 统计事件类型
+      const eventType = event.eventType || 'unknown';
+      stats.byType[eventType] = (stats.byType[eventType] || 0) + 1;
+
+      // 处理性能事件
+      if (eventType === 'performance' && event.eventData) {
+        stats.processed++;
+
+        // 将每个性能指标转换为单独的指标记录并保存
+        for (const [metricName, value] of Object.entries(event.eventData)) {
+          if (typeof value === 'number') {
+            await this.performanceService.saveMetric({
+              metricName,
+              value,
+              timestamp: event.timestamp || Date.now(),
+              pageUrl: event.pageUrl,
+              userAgent: event.userAgent,
+              appId: event.appId,
+            });
+          }
+        }
+      }
+    }
+
+    return new ApiResponse(stats, '批量事件处理完成');
   }
 
   @Get()
@@ -30,33 +82,30 @@ export class EventsController {
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ) {
+    // 确保page和limit是数字类型
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 10;
+
+    const [events, total] = await this.eventsService.findAll(pageNum, limitNum);
+
     return {
       success: true,
-      data: [],
+      data: events,
       pagination: {
-        page,
-        limit,
-        total: 0,
+        page: pageNum,
+        limit: limitNum,
+        total,
       },
     };
   }
 
   @Get('stats')
   async getEventStats() {
-    // 模拟统计数据
+    const stats = await this.eventsService.getEventStats();
+
     return {
       success: true,
-      data: {
-        total: 1000,
-        byType: {
-          page_view: 400,
-          click: 300,
-          error: 50,
-          performance: 250,
-        },
-        last24Hours: 150,
-        activeUsers: 120,
-      },
+      data: stats,
     };
   }
 }

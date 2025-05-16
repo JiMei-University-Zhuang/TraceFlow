@@ -1,20 +1,34 @@
-// src/pages/PerformanceDashboard/hooks/usePerformanceData.ts
 import { useEffect, useState } from 'react';
-import rawData from '../data/db.json';
+import { getPerformanceMetrics } from '@/apis/request';
 import { ApiRequest, PerformanceMetric, ResourceLoad, LongTask } from '../types';
 
-export const usePerformanceData = () => {
+export const usePerformanceData = params => {
   const [metrics, setMetrics] = useState<PerformanceMetric[]>([]);
   const [requests, setRequests] = useState<ApiRequest[]>([]);
   const [resources, setResources] = useState<ResourceLoad[]>([]);
-  const [LongTask, setLongTask] = useState<LongTask[]>([]);
+  const [longTasks, setLongTasks] = useState<LongTask[]>([]);
 
   useEffect(() => {
-    setMetrics(rawData.performanceMetrics);
-    setRequests(rawData.apiRequests);
-    setResources(rawData.resourceLoads);
-    setLongTask(rawData.LongTask);
-  }, []);
+    const fetchData = async () => {
+      try {
+        const response = await getPerformanceMetrics({ metricName: 'LCP' });
+        // console.log('Fetched performance data:', response); // 打印获取的数据
 
-  return { metrics, requests, resources, LongTask };
+        if (response && response.data.data.metrics) {
+          const data = response.data.data.metrics;
+
+          setMetrics(data.metricName || []);
+          setRequests(data.metricName || []);
+          setResources(data.metricName || []);
+          setLongTasks(data.metricName || []);
+        }
+      } catch (error: any) {
+        console.error('Error fetching performance data:', error);
+      }
+    };
+
+    fetchData();
+  }, [params]);
+
+  return { metrics, requests, resources, longTasks };
 };
