@@ -1,7 +1,7 @@
-import { PluginManager } from './plugin/PluginManager';
-import { IPlugin, PluginOptions } from './plugin/IPlugin';
-import { AbstractSandbox, ProxySandbox } from './sandbox';
-import { SandboxOptions, SandboxType } from './sandbox/types';
+import { PluginManager } from '../plugins/system/PluginManager';
+import { IPlugin, PluginOptions } from '../plugins/system/IPlugin';
+import { AbstractSandbox, ProxySandbox } from '../sandbox';
+import { SandboxOptions, SandboxType } from '../sandbox/types';
 
 /**
  * TraceFlow SDK 核心配置选项
