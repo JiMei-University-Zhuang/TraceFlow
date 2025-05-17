@@ -1,9 +1,6 @@
 import { AbstractPlugin, PluginState } from '../system/AbstractPlugin';
 import { TraceEventType, TraceEvent } from '../../core/types';
-import { initJsError } from './handlers/js-error';
-import { initPromiseError } from './handlers/promise-error';
-import { initResourceError } from './handlers/resource-error';
-import { initHttpError } from './handlers/http-error';
+import { initJsError, initPromiseError, initResourceError, initHttpError } from './handlers';
 import { ErrorPluginOptions, ErrorType, ErrorInfo } from './types';
 
 /**
