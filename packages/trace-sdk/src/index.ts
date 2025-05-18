@@ -1,7 +1,12 @@
 import { getTraceCore, TraceCore, TraceCoreOptions } from './core/TraceCore';
 import { ErrorPlugin } from './plugins/error';
+import { EventPlugin } from './plugins/event';
+import { PerformancePlugin, createPerformancePlugin } from './plugins/performance';
 import { TraceEventType, TraceEvent } from './core/types';
 import { SandboxType } from './sandbox/types';
+import { PerformancePluginOptions } from './plugins/performance/types';
+import { EventPluginOptions } from './plugins/event/types';
+import { IPlugin } from './plugins/system/IPlugin';
 
 /**
  * TraceFlow SDK配置选项
@@ -73,6 +78,16 @@ export interface TraceSDKOptions extends TraceCoreOptions {
   };
 
   /**
+   * 事件监控插件配置
+   */
+  eventPlugin?: EventPluginOptions;
+
+  /**
+   * 性能监控插件配置
+   */
+  performancePlugin?: PerformancePluginOptions;
+
+  /**
    * 插件配置
    */
   plugins?: Record<string, any>;
@@ -137,11 +152,19 @@ class TraceSDK {
    */
   private init(): void {
     // 注册错误监控插件
-    if (!this.options.plugins?.error === false) {
+    if (this.options.plugins?.error !== false) {
       this.initErrorPlugin();
     }
 
-    // 这里可以添加其他插件的初始化
+    // 注册事件监控插件
+    if (this.options.plugins?.event !== false) {
+      this.initEventPlugin();
+    }
+
+    // 注册性能监控插件
+    if (this.options.plugins?.performance !== false) {
+      this.initPerformancePlugin();
+    }
   }
 
   /**
@@ -149,9 +172,44 @@ class TraceSDK {
    */
   private initErrorPlugin(): void {
     const errorPlugin = new ErrorPlugin();
+    // 如果有配置选项，使用init方法初始化
+    if (this.options.errorPlugin) {
+      errorPlugin.init({
+        ...this.options.errorPlugin,
+        context: { traceCore: this.core },
+      });
+    }
 
     // 注册错误插件
     this.core.registerPlugin(errorPlugin);
+  }
+
+  /**
+   * 初始化事件监控插件
+   */
+  private initEventPlugin(): void {
+    const eventPlugin = new EventPlugin();
+    // 如果有配置选项，使用init方法初始化
+    if (this.options.eventPlugin) {
+      eventPlugin.init({
+        ...this.options.eventPlugin,
+        context: { traceCore: this.core },
+      });
+    }
+
+    // 注册事件插件
+    this.core.registerPlugin(eventPlugin);
+  }
+
+  /**
+   * 初始化性能监控插件
+   */
+  private initPerformancePlugin(): void {
+    // 创建性能监控插件
+    const performancePlugin = createPerformancePlugin(this.options.performancePlugin) as unknown as IPlugin;
+
+    // 注册性能监控插件
+    this.core.registerPlugin(performancePlugin);
   }
 
   /**
@@ -185,6 +243,56 @@ class TraceSDK {
   }
 
   /**
+   * 手动上报用户行为事件
+   * @param eventName 事件名称
+   * @param eventData 事件数据
+   */
+  public captureEvent(eventName: string, eventData?: Record<string, any>): void {
+    const eventPlugin = this.core.getPlugin<EventPlugin>('event');
+    if (eventPlugin) {
+      eventPlugin.captureEvent(eventName, eventData);
+    }
+  }
+
+  /**
+   * 手动上报性能指标
+   * @param metricName 指标名称
+   * @param value 指标值
+   * @param unit 单位
+   * @param metadata 元数据
+   */
+  public trackPerformance(metricName: string, value: number, unit?: string, metadata?: Record<string, any>): void {
+    // 使用一般的track方法上报性能数据
+    this.track(TraceEventType.PERFORMANCE, metricName, {
+      value,
+      unit,
+      ...metadata,
+    });
+  }
+
+  /**
+   * 启动SDK
+   */
+  public start(): void {
+    this.core.start();
+  }
+
+  /**
+   * 停止SDK
+   */
+  public stop(): void {
+    this.core.stop();
+  }
+
+  /**
+   * 检查SDK是否已启动
+   * 注意：此方法依赖于TraceCore内部实现
+   */
+  public isStarted(): boolean {
+    return !!this.core && !!(this.core as any).started;
+  }
+
+  /**
    * 立即上报所有事件
    */
   public flush(): void {
@@ -201,4 +309,7 @@ export const init = (options: TraceSDKOptions): TraceSDK => {
 export { TraceEventType, TraceEvent, SandboxType };
 
 // 导出插件
-export { ErrorPlugin };
+export { ErrorPlugin, EventPlugin, PerformancePlugin };
+export * from './plugins/performance/types';
+export * from './plugins/error/types';
+export * from './plugins/event/types';

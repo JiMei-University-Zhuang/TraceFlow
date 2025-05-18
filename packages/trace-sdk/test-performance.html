@@ -191,10 +191,28 @@
       tags: {
         'test': 'performance-monitor'
       },
+      // 错误监控插件配置
+      errorPlugin: {
+        jsError: true,
+        promiseError: true,
+        resourceError: true,
+        httpError: true,
+        samplingRate: 1.0,
+        ignoreErrors: []
+      },
+      // 事件监控插件配置
+      eventPlugin: {
+        clickEvent: true,
+        routeEvent: true,
+        exposureEvent: false,
+        customEvent: true,
+        samplingRate: 1.0
+      },
       // 性能监控插件配置
       performancePlugin: {
         pageLoadMetrics: true,
         resourceMetrics: true,
+        networkMetrics: true,
         samplingRate: 1.0,
         resourceSamplingRate: 1.0, // 为了测试，设置为全量采集
         reportInterval: 5000,
