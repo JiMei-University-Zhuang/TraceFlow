@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TraceFlow SDK 性能监控测试</title>
+  <style>
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .test-panel {
+      flex: 1;
+      border: 1px solid #eaeaea;
+      border-radius: 5px;
+      padding: 15px;
+    }
+
+    .result-panel {
+      flex: 1;
+      border: 1px solid #eaeaea;
+      border-radius: 5px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    h1 {
+      color: #333;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    button {
+      background-color: #2196F3;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #0b7dda;
+    }
+
+    .perf-group {
+      margin-bottom: 20px;
+      border-left: 3px solid #2196F3;
+      padding-left: 15px;
+    }
+
+    .perf-log {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+
+    .perf-type {
+      color: #2196F3;
+      font-weight: bold;
+    }
+
+    .perf-value {
+      color: #e91e63;
+      font-weight: bold;
+    }
+
+    .perf-details {
+      color: #666;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+
+    .perf-meta {
+      color: #4CAF50;
+      font-size: 12px;
+    }
+
+    .chart-container {
+      height: 200px;
+      margin: 20px 0;
+    }
+
+    .progress-container {
+      width: 100%;
+      background-color: #f1f1f1;
+      margin: 10px 0;
+      border-radius: 3px;
+    }
+
+    .progress-bar {
+      height: 20px;
+      background-color: #4CAF50;
+      text-align: center;
+      line-height: 20px;
+      color: white;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>TraceFlow SDK 性能监控测试</h1>
+  <p>这个页面用于测试TraceFlow SDK的性能监控功能，可以触发各种性能场景并观察SDK的监控情况。</p>
+
+  <div class="container">
+    <div class="test-panel">
+      <h2>测试操作</h2>
+
+      <div class="perf-group">
+        <h3>页面加载性能</h3>
+        <button onclick="simulatePageReload()">模拟页面刷新</button>
+        <button onclick="reportPageLoadMetrics()">获取页面加载指标</button>
+      </div>
+
+      <div class="perf-group">
+        <h3>资源加载性能</h3>
+        <button onclick="loadLargeImage()">加载大图片</button>
+        <button onclick="loadMultipleResources()">加载多个资源</button>
+        <button onclick="getResourceMetrics()">获取资源加载指标</button>
+      </div>
+
+      <div class="perf-group">
+        <h3>网络请求性能</h3>
+        <button onclick="makeXhrRequest()">XHR请求</button>
+        <button onclick="makeFetchRequest()">Fetch请求</button>
+        <button onclick="makeSlowRequest()">慢速请求</button>
+      </div>
+
+      <div class="perf-group">
+        <h3>SDK控制</h3>
+        <button onclick="startMonitoring()" style="background-color: #4CAF50;">启动监控</button>
+        <button onclick="stopMonitoring()" style="background-color: #f44336;">停止监控</button>
+        <button onclick="clearLogs()" style="background-color: #9E9E9E;">清空日志</button>
+      </div>
+    </div>
+
+    <div class="result-panel">
+      <h2>性能监控结果</h2>
+      <div id="perf-stats">
+        <div>
+          <strong>页面加载:</strong> <span id="page-load-time">-</span>
+        </div>
+        <div>
+          <strong>资源数量:</strong> <span id="resource-count">-</span>
+        </div>
+        <div>
+          <strong>资源总大小:</strong> <span id="resource-size">-</span>
+        </div>
+      </div>
+      <div class="chart-container">
+        <div class="progress-container">
+          <div class="progress-bar" id="page-load-bar" style="width:0%">0%</div>
+        </div>
+        <small>页面加载性能 (参考值: 绿色 &lt; 2s, 黄色 &lt; 4s, 红色 &gt;= 4s)</small>
+      </div>
+      <h3>详细日志</h3>
+      <div id="perf-logs"></div>
+    </div>
+  </div>
+
+  <!-- 加载TraceFlow SDK -->
+  <script>
+    // 使用自定义的SDK配置
+    window.TraceFlowConfig = {
+      appId: 'performance-test-app',
+      debug: true,
+      environment: 'development',
+      version: '1.0.0',
+      reportUrl: 'https://example.com/report', // 这里应替换为实际的上报地址
+      tags: {
+        'test': 'performance-monitor'
+      },
+      // 性能监控插件配置
+      performancePlugin: {
+        pageLoadMetrics: true,
+        resourceMetrics: true,
+        samplingRate: 1.0,
+        resourceSamplingRate: 1.0, // 为了测试，设置为全量采集
+        reportInterval: 5000,
+        maxBufferSize: 100
+      }
+    };
+  </script>
+  <script src="./dist/trace-sdk.umd.js"></script>
+
+  <script>
+    // 初始化SDK
+    const traceSDK = window.TraceFlow.init(window.TraceFlowConfig);
+    let perfMetrics = [];
+    let intervalIds = [];
+
+    // 自定义输出日志功能
+    function logPerformance(perfType, perfName, perfValue, unit, details, metadata) {
+      const logsContainer = document.getElementById('perf-logs');
+      const perfElem = document.createElement('div');
+      perfElem.className = 'perf-log';
+
+      // 格式化显示的值和单位
+      let displayValue = perfValue;
+      let displayUnit = unit || '';
+
+      // 根据单位调整显示值
+      if (unit === 'ms') {
+        displayValue = (perfValue >= 1000) ? (perfValue / 1000).toFixed(2) + 's' : perfValue + 'ms';
+      } else if (unit === 'byte') {
+        if (perfValue >= 1048576) {
+          displayValue = (perfValue / 1048576).toFixed(2) + 'MB';
+        } else if (perfValue >= 1024) {
+          displayValue = (perfValue / 1024).toFixed(2) + 'KB';
+        } else {
+          displayValue = perfValue + 'B';
+        }
+      }
+
+      perfElem.innerHTML = `
+        <div class="perf-type">${perfType}: ${perfName}</div>
+        <div class="perf-value">值: ${displayValue}</div>
+        ${details ? `<div class="perf-details">${details}</div>` : ''}
+        ${metadata ? `<div class="perf-meta">元数据: ${JSON.stringify(metadata, null, 2)}</div>` : ''}
+        <div class="perf-time">时间: ${new Date().toLocaleTimeString()}</div>
+      `;
+
+      logsContainer.prepend(perfElem);
+
+      // 存储性能数据
+      perfMetrics.push({
+        type: perfType,
+        name: perfName,
+        value: perfValue,
+        unit: unit,
+        time: Date.now(),
+        details: details,
+        metadata: metadata
+      });
+
+      updatePerformanceStats();
+    }
+
+    // 更新性能统计数据
+    function updatePerformanceStats() {
+      const pageLoadMetric = perfMetrics.find(m => m.name === 'page_load');
+      if (pageLoadMetric) {
+        document.getElementById('page-load-time').textContent =
+          pageLoadMetric.value >= 1000 ? (pageLoadMetric.value / 1000).toFixed(2) + 's' : pageLoadMetric.value + 'ms';
+
+        // 更新进度条
+        const percent = Math.min(100, (pageLoadMetric.value / 4000) * 100);
+        const bar = document.getElementById('page-load-bar');
+        bar.style.width = percent + '%';
+        bar.textContent = percent.toFixed(0) + '%';
+
+        // 设置颜色
+        if (pageLoadMetric.value < 2000) {
+          bar.style.backgroundColor = '#4CAF50'; // 绿色
+        } else if (pageLoadMetric.value < 4000) {
+          bar.style.backgroundColor = '#FFC107'; // 黄色
+        } else {
+          bar.style.backgroundColor = '#F44336'; // 红色
+        }
+      }
+
+      // 计算资源相关指标
+      const resources = perfMetrics.filter(m => m.type === 'resource');
+      document.getElementById('resource-count').textContent = resources.length;
+
+      const totalSize = resources.reduce((sum, m) => sum + (m.metadata?.size || 0), 0);
+      if (totalSize >= 1048576) {
+        document.getElementById('resource-size').textContent = (totalSize / 1048576).toFixed(2) + ' MB';
+      } else if (totalSize >= 1024) {
+        document.getElementById('resource-size').textContent = (totalSize / 1024).toFixed(2) + ' KB';
+      } else {
+        document.getElementById('resource-size').textContent = totalSize + ' bytes';
+      }
+    }
+
+    // 清空日志
+    function clearLogs() {
+      document.getElementById('perf-logs').innerHTML = '';
+      perfMetrics = [];
+      document.getElementById('page-load-time').textContent = '-';
+      document.getElementById('resource-count').textContent = '-';
+      document.getElementById('resource-size').textContent = '-';
+
+      const bar = document.getElementById('page-load-bar');
+      bar.style.width = '0%';
+      bar.textContent = '0%';
+    }
+
+    // 启动监控
+    function startMonitoring() {
+      traceSDK.start();
+      logPerformance('SDK', '监控状态', '已启动', null, 'TraceFlow SDK性能监控已启动');
+    }
+
+    // 停止监控
+    function stopMonitoring() {
+      traceSDK.stop();
+      logPerformance('SDK', '监控状态', '已停止', null, 'TraceFlow SDK性能监控已停止');
+
+      // 清理所有定时器
+      intervalIds.forEach(id => clearInterval(id));
+      intervalIds = [];
+    }
+
+    // 模拟页面刷新
+    function simulatePageReload() {
+      logPerformance('页面', '刷新操作', 0, 'ms', '准备刷新页面...');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
+
+    // 获取页面加载指标
+    function reportPageLoadMetrics() {
+      try {
+        const timing = performance.timing;
+        const loadTime = timing.loadEventEnd - timing.navigationStart;
+        const domReadyTime = timing.domContentLoadedEventEnd - timing.navigationStart;
+        const resourceTime = timing.loadEventEnd - timing.domContentLoadedEventEnd;
+
+        logPerformance('页面加载', 'page_load', loadTime, 'ms',
+          `DOM加载: ${domReadyTime}ms\n资源加载: ${resourceTime}ms`,
+          {
+            domReady: domReadyTime,
+            resources: resourceTime,
+            pageUrl: window.location.href
+          }
+        );
+
+        // 获取导航类型
+        let navType = '';
+        if (performance.navigation) {
+          switch (performance.navigation.type) {
+            case 0: navType = '直接访问'; break;
+            case 1: navType = '页面刷新'; break;
+            case 2: navType = '前进/后退'; break;
+            default: navType = '其他导航方式'; break;
+          }
+
+          logPerformance('导航类型', navType, 0, null,
+            `导航类型代码: ${performance.navigation.type}`,
+            { navigationType: performance.navigation.type }
+          );
+        }
+      } catch (e) {
+        logPerformance('错误', '获取页面指标失败', 0, null, e.message);
+      }
+    }
+
+    // 加载大图片
+    function loadLargeImage() {
+      const startTime = performance.now();
+      logPerformance('资源', '开始加载大图片', 0, 'ms', '开始加载高分辨率图片...');
+
+      const img = new Image();
+      img.onload = function () {
+        const loadTime = performance.now() - startTime;
+        logPerformance('资源加载', '大图片', loadTime, 'ms',
+          `图片尺寸: ${this.width}x${this.height}`,
+          {
+            url: img.src,
+            size: img.naturalWidth * img.naturalHeight * 4, // 估算大小
+            type: 'image'
+          }
+        );
+      };
+
+      img.onerror = function () {
+        const loadTime = performance.now() - startTime;
+        logPerformance('资源错误', '大图片加载失败', loadTime, 'ms',
+          '无法加载图片资源',
+          { url: img.src, type: 'image' }
+        );
+      };
+
+      // 使用随机参数避免缓存
+      img.src = 'https://picsum.photos/1600/900?random=' + Date.now();
+      document.body.appendChild(img);
+      img.style.display = 'none'; // 不显示图片，仅用于测试
+    }
+
+    // 加载多个资源
+    function loadMultipleResources() {
+      const startTime = performance.now();
+      const resourceCount = 5;
+      let loadedCount = 0;
+
+      logPerformance('资源', '开始加载多个资源', 0, 'ms', `准备加载${resourceCount}个资源...`);
+
+      for (let i = 0; i < resourceCount; i++) {
+        const img = new Image();
+
+        img.onload = function () {
+          loadedCount++;
+          const loadTime = performance.now() - startTime;
+
+          logPerformance('资源加载', `图片 ${i + 1}/${resourceCount}`, loadTime, 'ms',
+            `已加载 ${loadedCount}/${resourceCount}`,
+            {
+              url: img.src,
+              size: img.naturalWidth * img.naturalHeight * 4, // 估算大小
+              type: 'image'
+            }
+          );
+        };
+
+        img.onerror = function () {
+          loadedCount++;
+          const loadTime = performance.now() - startTime;
+
+          logPerformance('资源错误', `图片 ${i + 1}/${resourceCount} 加载失败`, loadTime, 'ms',
+            `已尝试 ${loadedCount}/${resourceCount}`,
+            { url: img.src, type: 'image' }
+          );
+        };
+
+        // 使用不同尺寸和随机参数
+        const size = 200 + (i * 100);
+        img.src = `https://picsum.photos/${size}/${size}?random=${Date.now()}-${i}`;
+        document.body.appendChild(img);
+        img.style.display = 'none'; // 不显示图片，仅用于测试
+      }
+    }
+
+    // 获取资源加载指标
+    function getResourceMetrics() {
+      try {
+        const resources = performance.getEntriesByType('resource');
+        let totalSize = 0;
+        let maxTime = 0;
+        let slowestResource = '';
+
+        resources.forEach(res => {
+          if (res.transferSize) {
+            totalSize += res.transferSize;
+          }
+
+          if (res.duration > maxTime) {
+            maxTime = res.duration;
+            slowestResource = res.name;
+          }
+        });
+
+        logPerformance('资源统计', '资源加载情况', resources.length, 'count',
+          `总资源数: ${resources.length}\n总大小: ${(totalSize / 1024).toFixed(2)} KB\n最慢资源加载时间: ${maxTime.toFixed(2)}ms\n最慢资源: ${slowestResource}`,
+          {
+            count: resources.length,
+            totalSize: totalSize,
+            maxTime: maxTime,
+            slowestResource: slowestResource
+          }
+        );
+
+        // 资源类型统计
+        const typeCount = {};
+        resources.forEach(res => {
+          const type = res.initiatorType || '未知';
+          typeCount[type] = (typeCount[type] || 0) + 1;
+        });
+
+        logPerformance('资源类型', '按类型统计', resources.length, 'count',
+          `${Object.entries(typeCount).map(([k, v]) => `${k}: ${v}`).join('\n')}`,
+          { types: typeCount }
+        );
+      } catch (e) {
+        logPerformance('错误', '获取资源指标失败', 0, null, e.message);
+      }
+    }
+
+    // XHR请求
+    function makeXhrRequest() {
+      const startTime = performance.now();
+      logPerformance('网络', '开始XHR请求', 0, 'ms', '发起XHR请求...');
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', 'https://jsonplaceholder.typicode.com/posts');
+
+      xhr.onload = function () {
+        const requestTime = performance.now() - startTime;
+
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const data = JSON.parse(xhr.responseText);
+          logPerformance('网络请求', 'XHR成功', requestTime, 'ms',
+            `状态: ${xhr.status}\n数据项数: ${data.length}`,
+            {
+              url: 'https://jsonplaceholder.typicode.com/posts',
+              method: 'GET',
+              status: xhr.status,
+              responseSize: xhr.responseText.length
+            }
+          );
+        } else {
+          logPerformance('网络错误', 'XHR失败', requestTime, 'ms',
+            `状态: ${xhr.status}\n错误: ${xhr.statusText}`,
+            {
+              url: 'https://jsonplaceholder.typicode.com/posts',
+              method: 'GET',
+              status: xhr.status
+            }
+          );
+        }
+      };
+
+      xhr.onerror = function () {
+        const requestTime = performance.now() - startTime;
+        logPerformance('网络错误', 'XHR请求失败', requestTime, 'ms',
+          '网络错误，无法完成请求',
+          {
+            url: 'https://jsonplaceholder.typicode.com/posts',
+            method: 'GET'
+          }
+        );
+      };
+
+      xhr.send();
+    }
+
+    // Fetch请求
+    function makeFetchRequest() {
+      const startTime = performance.now();
+      logPerformance('网络', '开始Fetch请求', 0, 'ms', '发起Fetch请求...');
+
+      fetch('https://jsonplaceholder.typicode.com/users')
+        .then(response => {
+          const requestTime = performance.now() - startTime;
+
+          if (response.ok) {
+            return response.json().then(data => {
+              logPerformance('网络请求', 'Fetch成功', requestTime, 'ms',
+                `状态: ${response.status}\n数据项数: ${data.length}`,
+                {
+                  url: 'https://jsonplaceholder.typicode.com/users',
+                  method: 'GET',
+                  status: response.status,
+                  responseSize: JSON.stringify(data).length
+                }
+              );
+            });
+          } else {
+            logPerformance('网络错误', 'Fetch响应错误', requestTime, 'ms',
+              `状态: ${response.status}\n错误: ${response.statusText}`,
+              {
+                url: 'https://jsonplaceholder.typicode.com/users',
+                method: 'GET',
+                status: response.status
+              }
+            );
+          }
+        })
+        .catch(error => {
+          const requestTime = performance.now() - startTime;
+          logPerformance('网络错误', 'Fetch请求失败', requestTime, 'ms',
+            `错误: ${error.message}`,
+            {
+              url: 'https://jsonplaceholder.typicode.com/users',
+              method: 'GET'
+            }
+          );
+        });
+    }
+
+    // 慢速请求
+    function makeSlowRequest() {
+      const startTime = performance.now();
+      logPerformance('网络', '开始慢速请求', 0, 'ms', '发起慢速请求(模拟延迟3秒)...');
+
+      // 使用模拟3秒延迟的API
+      fetch('https://httpbin.org/delay/3')
+        .then(response => {
+          const requestTime = performance.now() - startTime;
+
+          if (response.ok) {
+            return response.json().then(data => {
+              logPerformance('网络请求', '慢速请求成功', requestTime, 'ms',
+                `状态: ${response.status}\n响应时间: ${(requestTime / 1000).toFixed(2)}秒`,
+                {
+                  url: 'https://httpbin.org/delay/3',
+                  method: 'GET',
+                  status: response.status,
+                  delay: 3000
+                }
+              );
+            });
+          } else {
+            logPerformance('网络错误', '慢速请求响应错误', requestTime, 'ms',
+              `状态: ${response.status}\n错误: ${response.statusText}`,
+              {
+                url: 'https://httpbin.org/delay/3',
+                method: 'GET',
+                status: response.status
+              }
+            );
+          }
+        })
+        .catch(error => {
+          const requestTime = performance.now() - startTime;
+          logPerformance('网络错误', '慢速请求失败', requestTime, 'ms',
+            `错误: ${error.message}`,
+            {
+              url: 'https://httpbin.org/delay/3',
+              method: 'GET'
+            }
+          );
+        });
+    }
+
+    // 页面加载时执行
+    window.addEventListener('load', function () {
+      // 收集页面加载指标
+      setTimeout(() => {
+        reportPageLoadMetrics();
+      }, 500);
+    });
+  </script>
+</body>
+
+</html>
