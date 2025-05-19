@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TraceFlow SDK 错误监控测试</title>
+  <style>
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .test-panel {
+      flex: 1;
+      border: 1px solid #eaeaea;
+      border-radius: 5px;
+      padding: 15px;
+    }
+
+    .result-panel {
+      flex: 1;
+      border: 1px solid #eaeaea;
+      border-radius: 5px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    h1 {
+      color: #333;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .error-group {
+      margin-bottom: 20px;
+      border-left: 3px solid #4CAF50;
+      padding-left: 15px;
+    }
+
+    .error-log {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+
+    .error-type {
+      color: #e91e63;
+      font-weight: bold;
+    }
+
+    .error-message {
+      color: #333;
+    }
+
+    .error-stack {
+      color: #666;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+
+    .error-meta {
+      color: #2196F3;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>TraceFlow SDK 错误监控测试</h1>
+  <p>这个页面用于测试TraceFlow SDK的错误监控功能，可以触发各种类型的错误并观察SDK的捕获情况。</p>
+
+  <div class="container">
+    <div class="test-panel">
+      <h2>测试操作</h2>
+
+      <div class="error-group">
+        <h3>JavaScript 运行时错误</h3>
+        <button onclick="triggerJsError()">触发语法错误</button>
+        <button onclick="triggerReferenceError()">触发引用错误</button>
+        <button onclick="triggerTypeError()">触发类型错误</button>
+      </div>
+
+      <div class="error-group">
+        <h3>Promise 错误</h3>
+        <button onclick="triggerPromiseReject()">触发Promise拒绝</button>
+        <button onclick="triggerAsyncError()">触发Async/Await错误</button>
+      </div>
+
+      <div class="error-group">
+        <h3>资源加载错误</h3>
+        <button onclick="loadNonExistentImage()">加载不存在的图片</button>
+        <button onclick="loadNonExistentScript()">加载不存在的脚本</button>
+      </div>
+
+      <div class="error-group">
+        <h3>HTTP请求错误</h3>
+        <button onclick="makeFailedXhrRequest()">发送失败的XHR请求</button>
+        <button onclick="makeFailedFetchRequest()">发送失败的Fetch请求</button>
+      </div>
+
+      <div class="error-group">
+        <h3>手动上报错误</h3>
+        <button onclick="reportCustomError()">上报自定义错误</button>
+      </div>
+    </div>
+
+    <div class="result-panel">
+      <h2>捕获的错误 <button onclick="clearLogs()" style="background-color: #f44336;">清空</button></h2>
+      <div id="error-logs"></div>
+    </div>
+  </div>
+
+  <!-- 加载TraceFlow SDK -->
+  <script>
+    // 使用自定义的SDK配置
+    window.TraceFlowConfig = {
+      appId: 'error-test-app',
+      debug: true,
+      environment: 'development',
+      version: '1.0.0',
+      reportUrl: 'https://example.com/report', // 这里应替换为实际的上报地址
+      tags: {
+        'test': 'error-monitor'
+      },
+      errorPlugin: {
+        jsError: true,
+        promiseError: true,
+        resourceError: true,
+        httpError: true,
+        samplingRate: 1.0,
+        ignoreErrors: [
+          // 可以添加要忽略的错误模式
+          /ResizeObserver loop limit exceeded/
+        ]
+      }
+    };
+  </script>
+  <script src="./dist/trace-sdk.umd.js"></script>
+
+  <script>
+    // 初始化SDK
+    const traceSDK = window.TraceFlow.init(window.TraceFlowConfig);
+
+    // 自定义输出日志功能
+    function logError(errorType, errorMessage, errorStack, metadata) {
+      const logsContainer = document.getElementById('error-logs');
+      const errorElem = document.createElement('div');
+      errorElem.className = 'error-log';
+
+      errorElem.innerHTML = `
+        <div class="error-type">${errorType}</div>
+        <div class="error-message">${errorMessage}</div>
+        <div class="error-stack">${errorStack || '无堆栈信息'}</div>
+        ${metadata ? `<div class="error-meta">元数据: ${JSON.stringify(metadata, null, 2)}</div>` : ''}
+      `;
+
+      logsContainer.prepend(errorElem);
+    }
+
+    // 清空日志
+    function clearLogs() {
+      document.getElementById('error-logs').innerHTML = '';
+    }
+
+    // ===== JavaScript 运行时错误 =====
+    function triggerJsError() {
+      // 故意制造语法错误
+      eval('if(true) {');
+    }
+
+    function triggerReferenceError() {
+      // 引用不存在的变量
+      console.log(undefinedVariable);
+    }
+
+    function triggerTypeError() {
+      // 类型错误
+      const obj = null;
+      obj.method();
+    }
+
+    // ===== Promise 错误 =====
+    function triggerPromiseReject() {
+      // Promise 拒绝
+      new Promise((resolve, reject) => {
+        reject(new Error('Promise被显式拒绝'));
+      });
+    }
+
+    async function triggerAsyncError() {
+      // Async/Await 错误
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          reject(new Error('Async函数中的Promise错误'));
+        }, 100);
+      });
+    }
+
+    // ===== 资源加载错误 =====
+    function loadNonExistentImage() {
+      // 加载不存在的图片
+      const img = new Image();
+      // 直接添加错误监听
+      img.onerror = function (e) {
+        logError('图片加载错误', '无法加载图片: ' + img.src, null, {
+          type: 'image',
+          timestamp: new Date().toISOString()
+        });
+      };
+      // 使用本地路径确保错误能被捕获
+      img.src = '/non-existent-image-' + Date.now() + '.jpg';
+      document.body.appendChild(img);
+    }
+
+    function loadNonExistentScript() {
+      // 加载不存在的脚本
+      const script = document.createElement('script');
+      // 直接添加错误监听
+      script.onerror = function (e) {
+        logError('脚本加载错误', '无法加载脚本: ' + script.src, null, {
+          type: 'script',
+          timestamp: new Date().toISOString()
+        });
+      };
+      // 使用本地路径确保错误能被捕获
+      script.src = '/non-existent-script-' + Date.now() + '.js';
+      document.head.appendChild(script);
+    }
+
+    // ===== HTTP请求错误 =====
+    function makeFailedXhrRequest() {
+      // 发送到本地不存在的URL的XHR请求，避免跨域问题
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', '/api/non-existent-endpoint-' + Date.now());
+
+      // 添加错误事件监听
+      xhr.onerror = function () {
+        logError('XHR网络错误', '请求失败: ' + xhr.status, null, {
+          url: xhr.responseURL || this._url,
+          method: this._method,
+          timestamp: new Date().toISOString()
+        });
+      };
+
+      // 添加完成事件监听
+      xhr.onload = function () {
+        if (xhr.status >= 400) {
+          logError('XHR请求错误', `${xhr.status} ${xhr.statusText}`, null, {
+            url: xhr.responseURL || this._url,
+            method: this._method,
+            timestamp: new Date().toISOString()
+          });
+        }
+      };
+
+      xhr.send();
+    }
+
+    function makeFailedFetchRequest() {
+      // 使用本地路径，避免跨域问题
+      fetch('/api/non-existent-endpoint-' + Date.now())
+        .then(response => {
+          if (!response.ok) {
+            logError('Fetch请求错误', `${response.status} ${response.statusText}`, null, {
+              url: response.url,
+              timestamp: new Date().toISOString()
+            });
+          }
+          return response.json();
+        })
+        .catch(error => {
+          logError('Fetch网络错误', error.message, error.stack, {
+            timestamp: new Date().toISOString()
+          });
+        });
+    }
+
+    // ===== 手动上报错误 =====
+    function reportCustomError() {
+      // 创建自定义错误并上报
+      const customError = new Error('这是一个手动上报的自定义错误');
+      traceSDK.captureError(customError, {
+        customField: '自定义字段',
+        importance: 'high'
+      });
+
+      // 额外记录到界面日志
+      logError('手动上报', customError.message, customError.stack, {
+        customField: '自定义字段',
+        importance: 'high'
+      });
+    }
+
+    // 监听原始错误，显示在界面上
+    window.addEventListener('error', function (event) {
+      // 检查是否为资源加载错误
+      if (event.target instanceof HTMLElement && event.target !== window) {
+        const targetElement = event.target;
+        let resourceType = targetElement.tagName.toLowerCase();
+        let resourceUrl = '';
+
+        if (targetElement instanceof HTMLImageElement) {
+          resourceUrl = targetElement.src;
+        } else if (targetElement instanceof HTMLScriptElement) {
+          resourceUrl = targetElement.src;
+        } else if (targetElement instanceof HTMLLinkElement) {
+          resourceUrl = targetElement.href;
+        } else {
+          resourceUrl = String(event.target);
+        }
+
+        logError('资源加载错误',
+          `无法加载${resourceType}资源: ${resourceUrl}`,
+          null,
+          { type: resourceType, source: event });
+      }
+      // JavaScript运行时错误
+      else if (event.error) {
+        logError('JS错误', event.error.message, event.error.stack, {
+          filename: event.filename,
+          lineno: event.lineno,
+          colno: event.colno
+        });
+      }
+      // 其他错误
+      else {
+        logError('未知错误', event.message || '发生未知错误', null, {
+          event: `${event}`
+        });
+      }
+
+      // 不阻止默认行为，让SDK正常捕获
+      return true;
+    }, true);
+
+    window.addEventListener('unhandledrejection', function (event) {
+      logError('Promise错误', event.reason.message, event.reason.stack);
+      // 不阻止默认行为，让SDK正常捕获
+    });
+
+    // 重写XHR和Fetch以便记录到界面
+    const originalXHROpen = XMLHttpRequest.prototype.open;
+    const originalFetch = window.fetch;
+
+    XMLHttpRequest.prototype.open = function () {
+      this.addEventListener('load', function () {
+        if (this.status >= 400) {
+          logError('XHR错误', `${this.status} ${this.statusText}`, null, {
+            url: this._url,
+            method: this._method
+          });
+        }
+      });
+
+      this._url = arguments[1];
+      this._method = arguments[0];
+      return originalXHROpen.apply(this, arguments);
+    };
+
+    window.fetch = function () {
+      const url = arguments[0];
+      return originalFetch.apply(this, arguments)
+        .then(response => {
+          if (!response.ok) {
+            logError('Fetch错误', `${response.status} ${response.statusText}`, null, {
+              url: typeof url === 'string' ? url : url.url
+            });
+          }
+          return response;
+        });
+    };
+  </script>
+</body>
+
+</html>

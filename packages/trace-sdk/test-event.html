@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TraceFlow SDK 行为监控测试</title>
+  <style>
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .test-panel {
+      flex: 1;
+      border: 1px solid #eaeaea;
+      border-radius: 5px;
+      padding: 15px;
+    }
+
+    .result-panel {
+      flex: 1;
+      border: 1px solid #eaeaea;
+      border-radius: 5px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    h1 {
+      color: #333;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    button {
+      background-color: #2196F3;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #0b7dda;
+    }
+
+    .event-group {
+      margin-bottom: 20px;
+      border-left: 3px solid #2196F3;
+      padding-left: 15px;
+    }
+
+    .event-log {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+
+    .event-type {
+      color: #2196F3;
+      font-weight: bold;
+    }
+
+    .event-name {
+      color: #333;
+    }
+
+    .event-details {
+      color: #666;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+
+    .event-meta {
+      color: #FF9800;
+      font-size: 12px;
+    }
+
+    .exposure-element {
+      border: 1px dashed #ccc;
+      padding: 15px;
+      margin: 10px 0;
+      position: relative;
+    }
+
+    .product-card {
+      display: flex;
+      margin-bottom: 15px;
+      border: 1px solid #eee;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .product-card img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      margin-right: 15px;
+    }
+
+    .product-info {
+      flex: 1;
+    }
+
+    .tab-container {
+      margin: 20px 0;
+    }
+
+    .tab-buttons {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .tab-button {
+      padding: 8px 12px;
+      background: none;
+      border: none;
+      color: #333;
+      cursor: pointer;
+      margin-right: 2px;
+    }
+
+    .tab-button.active {
+      border-bottom: 2px solid #2196F3;
+      color: #2196F3;
+    }
+
+    .tab-content {
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-top: none;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>TraceFlow SDK 行为监控测试</h1>
+  <p>这个页面用于测试TraceFlow SDK的行为监控功能，可以触发各种类型的用户行为并观察SDK的捕获情况。</p>
+
+  <div class="container">
+    <div class="test-panel">
+      <h2>测试操作</h2>
+
+      <div class="event-group">
+        <h3>点击事件</h3>
+        <button id="test-button">普通按钮点击</button>
+        <button data-track="important-button" data-id="special-action">带追踪属性的按钮</button>
+        <div id="click-area"
+          style="width: 100%; height: 80px; background-color: #e3f2fd; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+          点击此区域
+        </div>
+      </div>
+
+      <div class="event-group">
+        <h3>路由事件</h3>
+        <button onclick="changeHash()">修改Hash</button>
+        <button onclick="pushState()">pushState</button>
+        <button onclick="replaceState()">replaceState</button>
+      </div>
+
+      <div class="event-group">
+        <h3>元素曝光</h3>
+        <div class="exposure-container" style="height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">
+          <p>向下滚动查看曝光元素</p>
+          <div style="height: 150px;"></div>
+
+          <div class="exposure-element" data-exposure="banner-1" data-exposure-name="主Banner" data-exposure-index="0">
+            <h4>曝光测试元素 1</h4>
+            <p>这个元素进入视口时会被记录曝光</p>
+          </div>
+
+          <div style="height: 100px;"></div>
+
+          <div class="exposure-element" data-exposure="banner-2" data-exposure-name="中间Banner" data-exposure-index="1">
+            <h4>曝光测试元素 2</h4>
+            <p>这个元素进入视口时会被记录曝光</p>
+          </div>
+
+          <div style="height: 100px;"></div>
+
+          <div class="exposure-element" data-exposure="banner-3" data-exposure-name="底部Banner" data-exposure-index="2">
+            <h4>曝光测试元素 3</h4>
+            <p>这个元素进入视口时会被记录曝光</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="event-group">
+        <h3>产品点击测试</h3>
+        <div class="product-list">
+          <div class="product-card" data-track="product" data-id="p001">
+            <img src="https://picsum.photos/80/80?random=1" alt="产品1">
+            <div class="product-info">
+              <h4>产品1</h4>
+              <p>这是产品1的简介，点击此卡片会被追踪</p>
+              <button data-track="buy-button" data-id="p001">购买</button>
+            </div>
+          </div>
+
+          <div class="product-card" data-track="product" data-id="p002">
+            <img src="https://picsum.photos/80/80?random=2" alt="产品2">
+            <div class="product-info">
+              <h4>产品2</h4>
+              <p>这是产品2的简介，点击此卡片会被追踪</p>
+              <button data-track="buy-button" data-id="p002">购买</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="event-group">
+        <h3>Tab切换测试</h3>
+        <div class="tab-container">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-tab="tab1">标签1</button>
+            <button class="tab-button" data-tab="tab2">标签2</button>
+            <button class="tab-button" data-tab="tab3">标签3</button>
+          </div>
+          <div class="tab-content">
+            <div class="tab-panel active" id="tab1">标签1的内容</div>
+            <div class="tab-panel" id="tab2">标签2的内容</div>
+            <div class="tab-panel" id="tab3">标签3的内容</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="event-group">
+        <h3>自定义事件</h3>
+        <button onclick="triggerCustomEvent()">触发自定义事件</button>
+        <button onclick="reportEvent()">手动上报事件</button>
+      </div>
+    </div>
+
+    <div class="result-panel">
+      <h2>捕获的事件 <button onclick="clearLogs()" style="background-color: #f44336;">清空</button></h2>
+      <div id="event-logs"></div>
+    </div>
+  </div>
+
+  <!-- 加载TraceFlow SDK -->
+  <script>
+    // 使用自定义的SDK配置
+    window.TraceFlowConfig = {
+      appId: 'event-test-app',
+      debug: true,
+      environment: 'development',
+      version: '1.0.0',
+      reportUrl: 'https://example.com/report', // 这里应替换为实际的上报地址
+      tags: {
+        'test': 'event-monitor'
+      },
+      eventPlugin: {
+        clickEvent: true,
+        routeEvent: true,
+        exposureEvent: true,
+        customEvent: true,
+        samplingRate: 1.0,
+        ignoreEvents: [
+          // 可以添加要忽略的事件模式
+        ]
+      }
+    };
+  </script>
+  <script src="./dist/trace-sdk.umd.js"></script>
+
+  <script>
+    // 初始化SDK
+    const traceSDK = window.TraceFlow.init(window.TraceFlowConfig);
+
+    // 自定义输出日志功能
+    function logEvent(eventType, eventName, eventDetails, metadata) {
+      const logsContainer = document.getElementById('event-logs');
+      const eventElem = document.createElement('div');
+      eventElem.className = 'event-log';
+
+      eventElem.innerHTML = `
+        <div class="event-type">${eventType}</div>
+        <div class="event-name">${eventName}</div>
+        <div class="event-details">${JSON.stringify(eventDetails, null, 2)}</div>
+        ${metadata ? `<div class="event-meta">元数据: ${JSON.stringify(metadata, null, 2)}</div>` : ''}
+      `;
+
+      logsContainer.prepend(eventElem);
+    }
+
+    // 清空日志
+    function clearLogs() {
+      document.getElementById('event-logs').innerHTML = '';
+    }
+
+    // ===== 点击事件 =====
+    document.getElementById('test-button').addEventListener('click', function (e) {
+      logEvent('点击', '普通按钮点击', {
+        target: e.target.tagName,
+        id: e.target.id,
+        position: { x: e.clientX, y: e.clientY }
+      });
+    });
+
+    document.getElementById('click-area').addEventListener('click', function (e) {
+      logEvent('点击', '区域点击', {
+        target: e.target.tagName,
+        id: e.target.id,
+        position: { x: e.clientX, y: e.clientY }
+      });
+    });
+
+    // ===== 路由事件 =====
+    function changeHash() {
+      window.location.hash = 'section-' + Date.now();
+      logEvent('路由', 'Hash变化', {
+        from: '',
+        to: window.location.hash,
+        type: 'hashchange'
+      });
+    }
+
+    function pushState() {
+      const state = { page: 'new-page-' + Date.now() };
+      const title = '';
+      const url = window.location.pathname + '?page=' + state.page;
+      history.pushState(state, title, url);
+      logEvent('路由', 'pushState', {
+        from: '',
+        to: url,
+        state: state,
+        type: 'pushState'
+      });
+    }
+
+    function replaceState() {
+      const state = { page: 'replaced-page-' + Date.now() };
+      const title = '';
+      const url = window.location.pathname + '?page=' + state.page;
+      history.replaceState(state, title, url);
+      logEvent('路由', 'replaceState', {
+        from: '',
+        to: url,
+        state: state,
+        type: 'replaceState'
+      });
+    }
+
+    // ===== Tab切换 =====
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.addEventListener('click', function () {
+        // 获取目标标签ID
+        const tabId = this.getAttribute('data-tab');
+
+        // 移除所有active类
+        document.querySelectorAll('.tab-button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-panel').forEach(panel => {
+          panel.classList.remove('active');
+        });
+
+        // 添加active类到当前标签和内容
+        this.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+
+        // 记录日志
+        logEvent('Tab切换', `切换到${tabId}`, {
+          previousTab: document.querySelector('.tab-button.active')?.getAttribute('data-tab') || '',
+          currentTab: tabId
+        });
+      });
+    });
+
+    // ===== 自定义事件 =====
+    function triggerCustomEvent() {
+      // 创建并分发自定义事件
+      const eventName = 'trace:custom-action';
+      const eventData = {
+        action: 'test-action',
+        timestamp: Date.now(),
+        value: Math.random().toFixed(2)
+      };
+
+      const customEvent = new CustomEvent(eventName, { detail: eventData });
+      document.dispatchEvent(customEvent);
+
+      // 记录日志
+      logEvent('自定义事件', eventName, eventData);
+    }
+
+    function reportEvent() {
+      // 使用SDK手动上报事件
+      const eventName = 'manual-event';
+      const eventData = {
+        action: 'manual-report',
+        timestamp: Date.now(),
+        importance: 'high'
+      };
+
+      // 这里假设traceSDK有一个captureEvent方法
+      if (traceSDK.captureEvent) {
+        traceSDK.captureEvent(eventName, eventData);
+      }
+
+      // 记录日志
+      logEvent('手动上报', eventName, eventData, {
+        method: 'SDK.captureEvent',
+        success: !!traceSDK.captureEvent
+      });
+    }
+
+    // 为所有产品卡片添加点击事件
+    document.querySelectorAll('.product-card').forEach(card => {
+      card.addEventListener('click', function (e) {
+        // 如果点击的是购买按钮，则不处理卡片点击
+        if (e.target.tagName === 'BUTTON') return;
+
+        const productId = this.getAttribute('data-id');
+        const productName = this.querySelector('h4').textContent;
+
+        logEvent('产品点击', productName, {
+          id: productId,
+          element: 'product-card'
+        });
+      });
+    });
+
+    // 为所有购买按钮添加点击事件
+    document.querySelectorAll('[data-track="buy-button"]').forEach(button => {
+      button.addEventListener('click', function (e) {
+        e.stopPropagation(); // 阻止事件冒泡到卡片
+
+        const productId = this.getAttribute('data-id');
+        const productCard = this.closest('.product-card');
+        const productName = productCard.querySelector('h4').textContent;
+
+        logEvent('购买点击', `购买${productName}`, {
+          id: productId,
+          element: 'buy-button',
+          price: (Math.random() * 100 + 50).toFixed(2)
+        });
+      });
+    });
+
+    // 监听SDK上报的事件
+    document.addEventListener('TraceFlow:event', function (e) {
+      if (e.detail && e.detail.type) {
+        logEvent(
+          'SDK捕获',
+          e.detail.name || e.detail.type,
+          e.detail.data || {},
+          { native: true }
+        );
+      }
+    });
+
+    // 如果SDK支持设置事件上报回调，可以使用类似下面的代码
+    // traceSDK.setEventCallback(function(event) {
+    //   logEvent('SDK回调', event.name, event.data, { callback: true });
+    // });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TraceFlow SDK 综合测试</title>
+  <style>
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .test-panel {
+      border: 1px solid #eaeaea;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .result-panel {
+      border: 1px solid #eaeaea;
+      border-radius: 5px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      max-height: 600px;
+      overflow-y: auto;
+      grid-column: span 2;
+    }
+
+    h1 {
+      color: #333;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      color: #2196F3;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 8px;
+      margin-top: 20px;
+    }
+
+    button {
+      background-color: #2196F3;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #0b7dda;
+    }
+
+    .error-btn {
+      background-color: #f44336;
+    }
+
+    .error-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    .event-btn {
+      background-color: #4CAF50;
+    }
+
+    .event-btn:hover {
+      background-color: #388E3C;
+    }
+
+    .perf-btn {
+      background-color: #FFC107;
+    }
+
+    .perf-btn:hover {
+      background-color: #FFA000;
+    }
+
+    .control-btn {
+      background-color: #9C27B0;
+    }
+
+    .control-btn:hover {
+      background-color: #7B1FA2;
+    }
+
+    .log {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+
+    .log-error {
+      border-left: 4px solid #f44336;
+    }
+
+    .log-event {
+      border-left: 4px solid #4CAF50;
+    }
+
+    .log-perf {
+      border-left: 4px solid #FFC107;
+    }
+
+    .log-system {
+      border-left: 4px solid #9C27B0;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+
+    .tab {
+      padding: 8px 16px;
+      cursor: pointer;
+      background-color: #f1f1f1;
+      margin-right: 2px;
+      border-radius: 5px 5px 0 0;
+    }
+
+    .tab.active {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>TraceFlow SDK 综合测试</h1>
+  <p>这个页面用于测试TraceFlow SDK的各种功能，包括错误监控、事件监控和性能监控。</p>
+
+  <div class="container">
+    <div class="test-panel">
+      <h2>错误监控测试</h2>
+      <button class="error-btn" onclick="triggerJsError()">触发JS错误</button>
+      <button class="error-btn" onclick="triggerPromiseError()">触发Promise错误</button>
+      <button class="error-btn" onclick="triggerResourceError()">触发资源加载错误</button>
+      <button class="error-btn" onclick="triggerHttpError()">触发HTTP请求错误</button>
+      <button class="error-btn" onclick="manualCaptureError()">手动上报错误</button>
+      
+      <h2>性能监控测试</h2>
+      <button class="perf-btn" onclick="reportPageLoadMetrics()">获取页面加载指标</button>
+      <button class="perf-btn" onclick="loadLargeImage()">加载大图片</button>
+      <button class="perf-btn" onclick="makeXhrRequest()">XHR请求</button>
+      <button class="perf-btn" onclick="makeFetchRequest()">Fetch请求</button>
+      <button class="perf-btn" onclick="trackCustomPerformance()">自定义性能指标</button>
+    </div>
+    
+    <div class="test-panel">
+      <h2>事件监控测试</h2>
+      <p>点击下面的元素触发点击事件:</p>
+      <button class="event-btn" id="clickTestBtn">测试点击事件</button>
+      <button class="event-btn" onclick="trackPageView()">模拟页面浏览</button>
+      <button class="event-btn" onclick="trackCustomEvent()">自定义事件</button>
+      
+      <h2>SDK控制</h2>
+      <button class="control-btn" onclick="startSDK()">启动SDK</button>
+      <button class="control-btn" onclick="stopSDK()">停止SDK</button>
+      <button class="control-btn" onclick="flushEvents()">立即上报事件</button>
+      <button class="control-btn" onclick="clearLogs()">清空日志</button>
+    </div>
+
+    <div class="result-panel">
+      <h2>监控结果</h2>
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('all')">全部</div>
+        <div class="tab" onclick="switchTab('errors')">错误</div>
+        <div class="tab" onclick="switchTab('events')">事件</div>
+        <div class="tab" onclick="switchTab('performance')">性能</div>
+        <div class="tab" onclick="switchTab('system')">系统</div>
+      </div>
+      <div id="all-logs" class="tab-content active"></div>
+      <div id="error-logs" class="tab-content"></div>
+      <div id="event-logs" class="tab-content"></div>
+      <div id="perf-logs" class="tab-content"></div>
+      <div id="system-logs" class="tab-content"></div>
+    </div>
+  </div>
+
+  <!-- 加载TraceFlow SDK -->
+  <script>
+    // 使用自定义的SDK配置
+    window.TraceFlowConfig = {
+      appId: 'traceflow-test-app',
+      debug: true,
+      environment: 'development',
+      version: '1.0.0',
+      reportUrl: 'https://example.com/report', // 这里应替换为实际的上报地址
+      tags: {
+        'test': 'comprehensive-test'
+      },
+      // 错误监控插件配置
+      errorPlugin: {
+        jsError: true,
+        promiseError: true,
+        resourceError: true,
+        httpError: true,
+        samplingRate: 1.0,
+        ignoreErrors: []
+      },
+      // 事件监控插件配置
+      eventPlugin: {
+        clickEvent: true,
+        routeEvent: true,
+        exposureEvent: false,
+        customEvent: true,
+        samplingRate: 1.0
+      },
+      // 性能监控插件配置
+      performancePlugin: {
+        pageLoadMetrics: true,
+        resourceMetrics: true,
+        networkMetrics: true,
+        samplingRate: 1.0,
+        resourceSamplingRate: 1.0,
+        reportInterval: 5000,
+        maxBufferSize: 100
+      }
+    };
+  </script>
+  <script src="./dist/trace-sdk.umd.js"></script>
+
+  <script>
+    // 初始化SDK
+    const traceSDK = window.TraceFlow.init(window.TraceFlowConfig);
+    
+    // 原始console方法
+    const originalConsole = {
+      log: console.log,
+      error: console.error,
+      warn: console.warn,
+      info: console.info
+    };
+    
+    // 替换控制台方法，捕获SDK日志
+    console.log = function() {
+      const args = Array.from(arguments);
+      if (args[0] && typeof args[0] === 'string' && args[0].includes('[TraceFlow]')) {
+        logToUI('system', 'SDK日志', args.join(' '));
+      }
+      originalConsole.log.apply(console, args);
+    };
+    
+    console.error = function() {
+      const args = Array.from(arguments);
+      if (args[0] && typeof args[0] === 'string' && args[0].includes('[TraceFlow]')) {
+        logToUI('system', 'SDK错误', args.join(' '), 'error');
+      }
+      originalConsole.error.apply(console, args);
+    };
+    
+    // 切换标签页
+    function switchTab(tabName) {
+      // 更新标签状态
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+      
+      // 更新内容显示
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.getElementById(tabName === 'all' ? 'all-logs' : tabName === 'errors' ? 'error-logs' : 
+                             tabName === 'events' ? 'event-logs' : tabName === 'performance' ? 'perf-logs' : 'system-logs').classList.add('active');
+    }
+    
+    // 记录日志到UI
+    function logToUI(type, title, message, level = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const allLogsContainer = document.getElementById('all-logs');
+      const typeLogsContainer = document.getElementById(
+        type === 'error' ? 'error-logs' : 
+        type === 'event' ? 'event-logs' : 
+        type === 'performance' ? 'perf-logs' : 'system-logs'
+      );
+      
+      const logElement = document.createElement('div');
+      logElement.className = `log log-${type}`;
+      
+      let messageContent = message;
+      if (typeof message === 'object') {
+        try {
+          messageContent = JSON.stringify(message, null, 2);
+        } catch (e) {
+          messageContent = String(message);
+        }
+      }
+      
+      logElement.innerHTML = `
+        <strong>${title}</strong> <span style="color: #888">${timestamp}</span>
+        <pre style="margin: 5px 0; white-space: pre-wrap;">${messageContent}</pre>
+      `;
+      
+      // 添加到所有日志
+      allLogsContainer.insertBefore(logElement.cloneNode(true), allLogsContainer.firstChild);
+      
+      // 添加到特定类型日志
+      typeLogsContainer.insertBefore(logElement, typeLogsContainer.firstChild);
+    }
+    
+    // 清空日志
+    function clearLogs() {
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.innerHTML = '';
+      });
+      logToUI('system', 'SDK操作', '已清空日志');
+    }
+    
+    // SDK控制功能
+    function startSDK() {
+      traceSDK.start();
+      logToUI('system', 'SDK操作', 'SDK已启动');
+    }
+    
+    function stopSDK() {
+      traceSDK.stop();
+      logToUI('system', 'SDK操作', 'SDK已停止');
+    }
+    
+    function flushEvents() {
+      traceSDK.flush();
+      logToUI('system', 'SDK操作', '已立即上报所有事件');
+    }
+    
+    // 错误监控测试
+    function triggerJsError() {
+      try {
+        // 故意触发一个JS错误
+        const obj = null;
+        obj.nonExistentMethod();
+      } catch (err) {
+        logToUI('error', 'JS错误', err.message);
+        throw err; // 重新抛出以触发SDK捕获
+      }
+    }
+    
+    function triggerPromiseError() {
+      // 故意触发一个Promise错误
+      new Promise((resolve, reject) => {
+        reject(new Error('测试Promise拒绝错误'));
+      }).catch(err => {
+        logToUI('error', 'Promise错误', err.message);
+        // 重新抛出以触发SDK捕获 (这里不是必要的，因为未处理的Promise会被SDK捕获)
+      });
+    }
+    
+    function triggerResourceError() {
+      // 加载一个不存在的图片资源
+      const img = new Image();
+      img.onerror = function() {
+        logToUI('error', '资源错误', '图片加载失败: ' + img.src);
+      };
+      img.src = './non-existent-image-' + Date.now() + '.jpg';
+    }
+    
+    function triggerHttpError() {
+      // 发起一个会失败的HTTP请求
+      fetch('https://non-existent-domain-' + Date.now() + '.com/api')
+        .catch(err => {
+          logToUI('error', 'HTTP请求错误', err.message);
+        });
+    }
+    
+    function manualCaptureError() {
+      // 手动上报一个错误
+      const error = new Error('手动上报的测试错误');
+      traceSDK.captureError(error, { 
+        source: 'test-all.html', 
+        customData: '这是自定义错误数据' 
+      });
+      logToUI('error', '手动上报错误', error.message);
+    }
+    
+    // 事件监控测试
+    document.getElementById('clickTestBtn').addEventListener('click', function(e) {
+      logToUI('event', '点击事件', 'id: clickTestBtn, 文本: ' + e.target.textContent);
+    });
+    
+    function trackPageView() {
+      traceSDK.captureEvent('page_view', {
+        page: window.location.pathname,
+        title: document.title,
+        referrer: document.referrer
+      });
+      logToUI('event', '页面浏览事件', `页面: ${window.location.pathname}, 标题: ${document.title}`);
+    }
+    
+    function trackCustomEvent() {
+      const eventData = {
+        category: 'test',
+        action: 'click',
+        label: '自定义事件按钮',
+        value: Date.now()
+      };
+      traceSDK.captureEvent('custom_event', eventData);
+      logToUI('event', '自定义事件', eventData);
+    }
+    
+    // 性能监控测试
+    function reportPageLoadMetrics() {
+      try {
+        const timing = performance.timing;
+        const loadTime = timing.loadEventEnd - timing.navigationStart;
+        const domReadyTime = timing.domContentLoadedEventEnd - timing.navigationStart;
+        const resourceTime = timing.loadEventEnd - timing.domContentLoadedEventEnd;
+
+        const metrics = {
+          loadTime,
+          domReadyTime,
+          resourceTime,
+          pageUrl: window.location.href
+        };
+        
+        logToUI('performance', '页面加载指标', `总加载时间: ${loadTime}ms\nDOM加载: ${domReadyTime}ms\n资源加载: ${resourceTime}ms`);
+      } catch (e) {
+        logToUI('error', '获取页面指标失败', e.message);
+      }
+    }
+    
+    function loadLargeImage() {
+      const startTime = performance.now();
+      logToUI('performance', '资源加载', '开始加载高分辨率图片...');
+
+      const img = new Image();
+      img.onload = function () {
+        const loadTime = performance.now() - startTime;
+        logToUI('performance', '资源加载完成', `图片加载耗时: ${loadTime.toFixed(2)}ms\n尺寸: ${this.width}x${this.height}`);
+      };
+
+      img.onerror = function () {
+        const loadTime = performance.now() - startTime;
+        logToUI('error', '资源加载失败', `图片加载失败，耗时: ${loadTime.toFixed(2)}ms`);
+      };
+
+      // 使用随机参数避免缓存
+      img.src = 'https://picsum.photos/1600/900?random=' + Date.now();
+      document.body.appendChild(img);
+      img.style.display = 'none'; // 不显示图片，仅用于测试
+    }
+    
+    function makeXhrRequest() {
+      const startTime = performance.now();
+      logToUI('performance', '网络请求', '开始XHR请求...');
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', 'https://jsonplaceholder.typicode.com/posts');
+
+      xhr.onload = function () {
+        const requestTime = performance.now() - startTime;
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const data = JSON.parse(xhr.responseText);
+          logToUI('performance', 'XHR请求成功', `状态: ${xhr.status}\n耗时: ${requestTime.toFixed(2)}ms\n数据项数: ${data.length}`);
+        } else {
+          logToUI('error', 'XHR请求失败', `状态: ${xhr.status}\n耗时: ${requestTime.toFixed(2)}ms\n错误: ${xhr.statusText}`);
+        }
+      };
+
+      xhr.onerror = function () {
+        const requestTime = performance.now() - startTime;
+        logToUI('error', 'XHR请求失败', `网络错误，耗时: ${requestTime.toFixed(2)}ms`);
+      };
+
+      xhr.send();
+    }
+    
+    function makeFetchRequest() {
+      const startTime = performance.now();
+      logToUI('performance', '网络请求', '开始Fetch请求...');
+
+      fetch('https://jsonplaceholder.typicode.com/users')
+        .then(response => {
+          const requestTime = performance.now() - startTime;
+          if (response.ok) {
+            return response.json().then(data => {
+              logToUI('performance', 'Fetch请求成功', `状态: ${response.status}\n耗时: ${requestTime.toFixed(2)}ms\n数据项数: ${data.length}`);
+            });
+          } else {
+            logToUI('error', 'Fetch请求失败', `状态: ${response.status}\n耗时: ${requestTime.toFixed(2)}ms\n错误: ${response.statusText}`);
+          }
+        })
+        .catch(error => {
+          const requestTime = performance.now() - startTime;
+          logToUI('error', 'Fetch请求失败', `错误: ${error.message}\n耗时: ${requestTime.toFixed(2)}ms`);
+        });
+    }
+    
+    function trackCustomPerformance() {
+      const metrics = {
+        customValue: Math.round(Math.random() * 1000),
+        timestamp: Date.now()
+      };
+      
+      traceSDK.trackPerformance('custom_metric', metrics.customValue, 'ms', { source: 'test-ui' });
+      logToUI('performance', '自定义性能指标', `值: ${metrics.customValue}ms\n来源: test-ui`);
+    }
+    
+    // 页面加载完成时
+    window.addEventListener('load', function() {
+      logToUI('system', 'SDK初始化', '综合测试页面已加载，SDK已初始化');
+      setTimeout(reportPageLoadMetrics, 500);
+    });
+  </script>
+</body>
+</html>
