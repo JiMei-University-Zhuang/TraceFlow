@@ -7,9 +7,9 @@
     "moduleResolution": "node",
     "target": "ES6",
     "lib": ["DOM", "ESNext"],
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["src/*"]
     },
     "skipLibCheck": true,
     "resolveJsonModule": true

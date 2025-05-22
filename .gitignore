@@ -4,3 +4,6 @@ dist/
 .env
 *.log
 .pnpm-store/
+.idea/
+.vscode/
+*.sublime-workspace
