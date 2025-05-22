@@ -22,6 +22,8 @@ const config = {
   output: {
     filename: isDevelopment ? 'bundle.js' : 'bundle.[contenthash].js',
     path: path.join(__dirname, 'dist'),
+    chunkFilename: isDevelopment ? '[name].chunk.js' : '[name].[contenthash].chunk.js',
+    publicPath: '/',
   },
   cache: {
     type: 'filesystem',
@@ -30,7 +32,38 @@ const config = {
     rules: [
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader', 'postcss-loader'],
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              modules: {
+                auto: true,
+                localIdentName: isDevelopment ? '[name]__[local]--[hash:base64:5]' : '[hash:base64]',
+              },
+              importLoaders: 1,
+            },
+          },
+          'postcss-loader',
+        ],
+      },
+      {
+        test: /\.less$/,
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              modules: {
+                auto: true,
+                localIdentName: isDevelopment ? '[name]__[local]--[hash:base64:5]' : '[hash:base64]',
+              },
+              importLoaders: 2,
+            },
+          },
+          'postcss-loader',
+          'less-loader',
+        ],
       },
       {
         test: /\.(png|jpe?g|svg|gif)$/,
@@ -48,7 +81,6 @@ const config = {
           loader: 'tsx',
           target: 'es2015',
           tsconfigRaw: tsConfig,
-          // 在开发模式下启用react-refresh
           jsx: isDevelopment ? 'automatic' : 'transform',
         },
         exclude: /node_modules/,
@@ -65,7 +97,6 @@ const config = {
     new DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(isDevelopment ? 'development' : 'production'),
     }),
-    // 仅在开发模式下启用热更新
     ...(isDevelopment ? [new ReactRefreshWebpackPlugin()] : []),
     new ForkTsCheckerWebpackPlugin({
       typescript: {
@@ -77,7 +108,7 @@ const config = {
     }),
   ],
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.tsx', '.ts', '.js', '.less', '.css'],
     alias: {
       '@': path.resolve(__dirname, 'src'),
     },
