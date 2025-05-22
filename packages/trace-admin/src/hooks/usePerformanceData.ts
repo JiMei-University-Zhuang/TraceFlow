@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getPerformanceMetrics } from '@/apis/request';
+import { getPerformanceMetrics } from '@/api/request';
 import { ApiRequest, PerformanceMetric, ResourceLoad, LongTask } from '../types';
 
 export const usePerformanceData = params => {

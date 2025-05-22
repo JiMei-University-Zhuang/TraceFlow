@@ -4,7 +4,7 @@ import { Link, useRoutes } from 'react-router-dom';
 import { DashboardOutlined, BugOutlined, LineChartOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import './App.css';
 import logo from './assets/logo.png';
-import router from './route';
+import router from './routes';
 
 const { Sider, Content } = Layout;
 

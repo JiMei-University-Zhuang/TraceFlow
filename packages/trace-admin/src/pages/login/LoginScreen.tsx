@@ -1,9 +1,10 @@
-import { User } from '../types/index';
+import { User } from '@/types';
 import { Button, Form, Input } from 'antd';
 import FormItem from 'antd/es/form/FormItem';
 import React from 'react';
 import axios from 'axios';
 import { useUser } from '@/store/user-context';
+
 export default function LoginScreen() {
   const handleSubmit = (user: User) => {
     const { setUser, setTokenToLocalStorage, setToken } = useUser();

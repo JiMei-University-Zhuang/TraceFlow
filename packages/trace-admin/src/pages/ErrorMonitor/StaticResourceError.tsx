@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, ConfigProvider } from 'antd';
 import type { TableProps } from 'antd';
-import { getError } from '@/apis/request';
+import { getError } from '@/api/request';
 
 interface ErrorType {
   _id: string;
