@@ -1,13 +1,13 @@
 import React from 'react';
 import { Layout, Menu, theme } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { DashboardOutlined, BugOutlined, LineChartOutlined, UserOutlined, SettingOutlined } from '@ant-design/icons';
+import { DashboardOutlined, LineChartOutlined, UserOutlined } from '@ant-design/icons';
 
 const { Header, Content, Sider } = Layout;
 
-import styles from './MainLayout.module.less';
+import styles from './index.module.less';
 
-const MainLayout: React.FC = () => {
+const Index: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -22,11 +22,6 @@ const MainLayout: React.FC = () => {
       label: '仪表盘',
     },
     {
-      key: '/errors',
-      icon: <BugOutlined />,
-      label: '错误监控',
-    },
-    {
       key: '/performance',
       icon: <LineChartOutlined />,
       label: '性能分析',
@@ -35,11 +30,6 @@ const MainLayout: React.FC = () => {
       key: '/behavior',
       icon: <UserOutlined />,
       label: '用户行为',
-    },
-    {
-      key: '/settings',
-      icon: <SettingOutlined />,
-      label: '系统设置',
     },
   ];
 
@@ -70,4 +60,4 @@ const MainLayout: React.FC = () => {
   );
 };
 
-export default MainLayout;
+export default Index;

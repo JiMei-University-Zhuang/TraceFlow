@@ -2,13 +2,15 @@ import React, { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Spin } from 'antd';
 
-import MainLayout from '@/layouts/MainLayout';
+import Index from '@/layouts/MainLayout';
+import SimpleLayout from '@/layouts/SimpleLayout';
 
 // 懒加载组件
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const PerformanceAnalysis = lazy(() => import('@/pages/PerformanceAnalysis'));
 const UserBehavior = lazy(() => import('@/pages/UserBehavior'));
 const Login = lazy(() => import('@/pages/login'));
+const NotFound = lazy(() => import('@/pages/NotFound'));
 
 // 加载中的组件
 const LoadingComponent = () => (
@@ -21,7 +23,7 @@ const LoadingComponent = () => (
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <MainLayout />,
+    element: <Index />,
     children: [
       {
         index: true,
@@ -54,12 +56,30 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: '/',
+    element: <SimpleLayout />,
+    children: [
+      {
+        path: '404',
+        element: (
+          <Suspense fallback={<LoadingComponent />}>
+            <NotFound />
+          </Suspense>
+        ),
+      },
+    ],
+  },
+  {
     path: '/login',
     element: (
       <Suspense fallback={<LoadingComponent />}>
         <Login />
       </Suspense>
     ),
+  },
+  {
+    path: '*',
+    element: <Navigate to="/404" replace />,
   },
 ]);
 
