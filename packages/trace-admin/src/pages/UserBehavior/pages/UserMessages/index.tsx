@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Search from '../../components/Search';
-import MyList from '../../components/MyList';
+import Search from '../../components/Search.tsx';
+import MyList from '../../components/MyList.tsx';
 import { UserData } from '../../../../hooks/userData';
 
 export default function UserMessages() {

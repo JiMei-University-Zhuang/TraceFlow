@@ -1,26 +1,30 @@
 .container {
   height: 100vh;
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 20px 24px;
+  background-color: #f5f7fa;
 }
 
 .title {
   margin-bottom: 24px;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.85);
+  letter-spacing: 0.5px;
 }
 
 .statsRow {
   flex-shrink: 0;
+  margin-bottom: 8px;
 }
 
 .contentSection {
   flex: 1;
   overflow-y: auto;
-  padding-right: 10px;
+  padding-right: 8px;
+  margin: 0 -8px;
   
   /* 自定义滚动条样式 */
   &::-webkit-scrollbar {
@@ -29,27 +33,34 @@
   }
   
   &::-webkit-scrollbar-thumb {
-    background: #d9d9d9;
-    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
     
     &:hover {
-      background: #bfbfbf;
+      background: rgba(0, 0, 0, 0.25);
     }
   }
   
   &::-webkit-scrollbar-track {
-    background: #f5f5f5;
-    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
   }
 }
 
 .card {
   height: 100%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  border: none;
+  overflow: hidden;
+
+  :global(.ant-card-body) {
+    padding: 20px;
+  }
 
   &:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
   }
 }
@@ -57,42 +68,65 @@
 .sectionTitle {
   font-size: 18px;
   font-weight: 500;
-  margin-top: 24px;
+  margin-top: 28px;
   margin-bottom: 16px;
   color: rgba(0, 0, 0, 0.85);
-  padding-left: 8px;
+  padding-left: 10px;
   border-left: 4px solid @primary-color;
+  display: flex;
+  align-items: center;
 }
 
 .errorList {
   margin-bottom: 24px;
-  overflow: auto;
+  overflow: hidden;
+  border-radius: 8px;
+
+  :global(.ant-table-thead > tr > th) {
+    background: #fafbfc;
+    color: rgba(0, 0, 0, 0.7);
+    font-weight: 600;
+  }
 
   :global(.ant-table-tbody > tr:hover > td) {
     background-color: lighten(@primary-color, 39%);
+  }
+
+  :global(.ant-table-tbody > tr > td) {
+    border-bottom: 1px solid #f0f2f7;
   }
 }
 
 .performanceChart {
   margin-bottom: 24px;
+  border-radius: 8px;
+  
+  :global(.ant-typography) {
+    margin-bottom: 16px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.75);
+  }
 }
 
 .chartContainer {
   display: flex;
   flex-direction: column;
-  margin-top: 16px;
+  margin-top: 8px;
 }
 
 .chartItem {
   display: flex;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  align-items: center;
 }
 
 .chartDay {
-  width: 60px;
+  width: 64px;
   font-weight: 500;
   color: rgba(0, 0, 0, 0.65);
   line-height: 32px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 .chartBar {
@@ -100,24 +134,45 @@
 }
 
 .barItem {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  position: relative;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .barLabel {
   display: flex;
   justify-content: space-between;
   color: rgba(0, 0, 0, 0.65);
-  margin-bottom: 4px;
-  font-size: 12px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  
+  &::after {
+    content: attr(data-value);
+    font-weight: 500;
+  }
 }
 
-.placeholder {
-  height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #8c8c8c;
-  font-size: 14px;
-  background: #fafafa;
-  border-radius: 4px;
+:global {
+  .ant-progress-bg {
+    height: 12px !important;
+  }
+  
+  .ant-progress-outer {
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .ant-card-head {
+    border-bottom: 1px solid #f0f0f0;
+    min-height: 48px;
+  }
+  
+  .ant-card-head-title {
+    padding: 16px 0;
+    font-size: 16px;
+    font-weight: 500;
+  }
 } 
