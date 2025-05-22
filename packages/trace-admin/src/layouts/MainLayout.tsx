@@ -5,8 +5,7 @@ import { DashboardOutlined, BugOutlined, LineChartOutlined, UserOutlined, Settin
 
 const { Header, Content, Sider } = Layout;
 
-// 导入样式
-import styles from './MainLayout.less';
+import styles from './MainLayout.module.less';
 
 const MainLayout: React.FC = () => {
   const navigate = useNavigate();

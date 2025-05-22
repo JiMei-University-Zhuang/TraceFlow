@@ -3,7 +3,7 @@ import { Card, Row, Col, Statistic } from 'antd';
 import { AlertOutlined, CheckCircleOutlined, LineChartOutlined, UserOutlined } from '@ant-design/icons';
 
 // 导入模块化样式
-import styles from './index.less';
+import styles from './index.module.less';
 
 const Dashboard: React.FC = () => {
   return (

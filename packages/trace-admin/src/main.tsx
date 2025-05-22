@@ -8,7 +8,7 @@ import zhCN from 'antd/es/locale/zh_CN';
 import router from './router';
 
 // 全局样式
-import './styles/global.less';
+import './styles/global.module.less';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
